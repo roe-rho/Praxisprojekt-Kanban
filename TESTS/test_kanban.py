@@ -1,8 +1,8 @@
 import unittest
 import threading
 import time
-import Kanban as K
-from Kanban import *
+import Backend.Kanban as K
+from Backend.Kanban import *
 
 
 
@@ -37,8 +37,16 @@ class TestTaskProcessing(unittest.TestCase):
 
     def test_task_processing(self):
         """Test task processing."""
-        pass
-
+        global running, num_columns
+        K.generate_columns(4)
+        num_columns = 4
+        running = True
+        K.column[0].append("Test Task")
+        processor_thread = threading.Thread(target=K.process_tasks,args=(1,))
+        processor_thread.daemon = True
+        processor_thread.start()
+        time.sleep(2)
+        runnig = False
 
 class TestDoneTasks(unittest.TestCase):
     """Test cases for done_tasks function."""
