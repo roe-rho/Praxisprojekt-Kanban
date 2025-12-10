@@ -2,10 +2,7 @@ import time
 import threading
 import random
 
-global column
-global max_tasks
 running = True
-max_tasks = 5
 #backlog = column[0]
 #done = column[num_columns - 1]
 
@@ -61,12 +58,16 @@ def main():
     global num_columns
     global col
     global worker_count
+    global max_tasks
     num_columns = int(input("Enter number of columns: "))
     while num_columns >= 11:
         print(f"Maximum columns is 10")
         num_columns = int(input("Enter number of columns: "))
         
     worker_count = int(input("Enter number of workers per processing column: "))
+
+    max_tasks = int(input("Enter maximum tasks per column: "))
+
     columns = generate_columns(num_columns)
     print(columns)
     generator_thread = threading.Thread(target=generate_task)
@@ -95,3 +96,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+#Usage:
+# 1. User defines number of columns (max 10) , number of workers per processing column and maximum tasks per column.
+# 2. 
