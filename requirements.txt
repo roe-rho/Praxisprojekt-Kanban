@@ -1,2 +1,4 @@
 Flask
 Flask-CORS
+
+#pip install -r requirements.txt
