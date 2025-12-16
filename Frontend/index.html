@@ -10,10 +10,17 @@
     <header>
         <h1>Kanban Simulation</h1>
     </header>
+    <div class = "controls">
+        <button id = "start-btn">Start Simulation</button>
+        <button id = "stop-btn">Stop Simulation</button>
+        <button id = "reset-btn">Reset Simulation</button>
+
+
+    </div>
     <main>
         <section id="kanban-board">
             <div class="column" id="col-backlog">
-                <h2>Backlog</h2>
+                <h2>To Do</h2>
                 <div><input id="Backlog" type="number" value="2" min="1" style="width: 40px"><div class="count"></div></div>
                 <div class="cards"></div>
             </div>
@@ -23,13 +30,8 @@
                 <div class="cards"></div>
             </div>
             <div class="column" id="col-testing">
-                <h2>Testing</h2>
-                <div><input id="Testing" type="number" value="2" min="1" style="width: 40px"><div class="count"></div></div>
-                <div class="cards"></div>
-            </div>
-            <div class="column" id="col-done">
                 <h2>Done</h2>
-                <div><input id="Done" type="number" value="2" min="1" style="width: 40px"><div class="count"></div></div>
+                <div><input id="Testing" type="number" value="2" min="1" style="width: 40px"><div class="count"></div></div>
                 <div class="cards"></div>
             </div>
         </section>

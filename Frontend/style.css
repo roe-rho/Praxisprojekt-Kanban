@@ -1,7 +1,7 @@
 /* General Styles */
 body {
     font-family: Comic Sans MS, cursive, sans-serif;
-    background-color: #f8aa00f8;
+    background-color: #c2af87f8;
     color: #000000;
     margin: 0;
     padding: 0;
@@ -9,7 +9,7 @@ body {
 
 /* Header */
 header {
-    background-color: #f8aa00f8;
+    background-color: #d0c09ef8;
     border-bottom: 1px solid #000000;
     padding: 1rem;
     text-align: center;
@@ -28,9 +28,17 @@ main {
     gap: 1rem;
     flex-wrap: nowrap;
 }
+/*control panel*/
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #d0c09ef8;
+}
 
 /* Buttons */
-button {
+.controls button {
     background-color: #007bff;
     color: #ffffff;
     border: none;
@@ -40,8 +48,11 @@ button {
     font-size: 1rem;
 }
 
-button:hover {
+.controls button:hover {
     background-color: #0056b3;
+}
+.controls button:active{
+    transform: scale(0.98);
 }
 
 /* Columns */
