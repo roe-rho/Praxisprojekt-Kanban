@@ -1,13 +1,29 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
+# NEW: Added CORS support so Frontend can talk to Backend from different ports
+from flask_cors import CORS
+# NEW: Import webbrowser to automatically open Frontend in browser
+import webbrowser
 import Kanban as KB
 import json
 import threading
 import time
+import os
 
+# NEW: Get the absolute path to the Frontend folder
+FRONTEND_PATH = os.path.join(os.path.dirname(__file__), '..', 'Frontend')
 
+app = Flask(__name__, static_folder=FRONTEND_PATH, static_url_path='')
+# NEW: Enable CORS - allows localhost:8000 (Frontend) to communicate with localhost:5000 (Backend)
+CORS(app)  # Enable CORS for all routes
 
+# NEW: Serve Frontend files (index.html, script.js, style.css) directly from Flask
+@app.route('/')
+def index():
+    return send_from_directory(FRONTEND_PATH, 'index.html')
 
-app = Flask(__name__)
+@app.route('/<path:filename>')
+def serve_static(filename):
+    return send_from_directory(FRONTEND_PATH, filename)
 
 def get_board_state():
     board_state = {}
@@ -37,44 +53,102 @@ def board():
 
 @app.route('/start', methods=['POST'])
 def start():
-    if not KB.running:
-        KB.running = True
-
-
+    # NEW: Set running flag to True to start the simulation
+    KB.running = True
+    # NEW: Restart threads in case they were stopped (e.g., after reset)
+    start_kanban_simulation()  # Restart threads if needed
 @app.route('/stop', methods=['POST'])
 def stop():
+    # NEW: Check if running before stopping (safety check)
     if KB.running:
+        # NEW: Set running flag to False - this stops all threads gracefully
         KB.running = False
+    # NEW: Return JSON response so Frontend knows it worked
+    return jsonify({"status": "Simulation stopped"})
 
 @app.route('/reset', methods=['POST'])
 def reset():
-    KB.reset_board()
-    return jsonify({"status": "Board reset"})
+    try:
+        # NEW: Stop the simulation first
+        KB.running = False
+        # NEW: Use thread lock to safely clear all columns
+        with KB.lock:
+            # NEW: Loop through all columns and empty them
+            for i in range(len(KB.column)):
+                KB.column[i] = []
+        print("Board has been reset.")
+        # NEW: Return success message
+        return jsonify({"status": "Board reset"})
+    except Exception as e:
+        # NEW: Error handling - if something goes wrong, return error message
+        print(f"Error resetting board: {e}")
+        return jsonify({"status": "Error resetting board", "error": str(e)}), 500
 
-
-if __name__ == '__main__':
+def start_kanban_simulation():
+    """Start the Kanban simulation in background threads"""
+    # NEW: Start task generator thread if it's not already running
+    if KB.generator_thread is None or not KB.generator_thread.is_alive():
+        # NEW: Create thread that generates new tasks
+        KB.generator_thread = threading.Thread(target=KB.generate_task, daemon=True)
+        KB.generator_thread.start()
     
-    # Initialize Kanban board parameters
+    # NEW: Start worker threads if they're not already running
+    if not KB.worker_threads or not any(t.is_alive() for t in KB.worker_threads):
+        KB.worker_threads = []
+        # NEW: Create threads for processing tasks through columns
+        for col in range(KB.num_columns):
+            if col % 2 != 0 and col < KB.num_columns - 1:
+                for i in range(KB.worker_count):
+                    # NEW: Each worker processes tasks in its assigned column
+                    t = threading.Thread(target=KB.process_tasks, args=(col,), daemon=True)
+                    t.start()
+                    KB.worker_threads.append(t)
+if __name__ == '__main__':
+    # MAIN FUNCTION EXPLANATION:
+    # Before: KB.main() had a blocking while True loop that prevented Flask from handling requests
+    # After: We now start simulation in background threads using start_kanban_simulation(), which
+    # creates daemon threads for task generation and processing. These threads run independently
+    # without blocking Flask, allowing the web server to stay responsive to Frontend API requests.
+    # This architecture enables Frontend-Backend communication: the Frontend periodically fetches
+    # the board state via /board endpoint, and buttons send control commands (/start, /stop, /reset)
+    # to manage the simulation.
+    
+    # NEW: Initialize board settings
     KB.num_columns = 3
     KB.worker_count = 2
     KB.max_tasks = 5
     
-    start()
-    
-    # Generate columns for initial state display
+    # NEW: Create empty columns for the board
     KB.generate_columns(KB.num_columns)
+    # NEW: Initialize thread variables (needed for start/stop functionality)
+    KB.generator_thread = None
+    KB.worker_threads = []
+    KB.done_thread = None
     
     print("\n=== Initial Board State ===")
     check_board_state()
     print("\n=== Starting Kanban Board ===\n")
     
-    # Start monitoring thread to display board state
-    monitor_thread = threading.Thread(target=monitor_board_state, daemon=True)
-    monitor_thread.start()
+    # NEW: Start the simulation
+    KB.running = True
+    start_kanban_simulation()
     
-    # Start Kanban main function in a separate thread
-    kanban_thread = threading.Thread(target=KB.main, daemon=True)
-    kanban_thread.start()
+    # NEW: Automatically open the Frontend in the default browser
+    # Now opens localhost:5000 instead of 5500 (Flask serves the Frontend)
+    webbrowser.open('http://127.0.0.1:5000/')
+    
+    # NEW: Start Flask server on localhost:5000 (serves both Backend API and Frontend)
+    # debug=False: Don't show debug mode (safer for production)
+    # use_reloader=False: Don't reload on code changes (prevents double thread creation)
+    app.run(debug=False, use_reloader=False, host='127.0.0.1', port=5000)
+    
+    print("\n=== Initial Board State ===")
+    check_board_state()
+    print("\n=== Starting Kanban Board ===\n")
+    
+    # Start the simulation
+    KB.running = True
+    start_kanban_simulation()
     
     # Start the Flask app
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=False, use_reloader=False, host='127.0.0.1', port=5000)
