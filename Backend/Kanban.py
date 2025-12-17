@@ -6,7 +6,7 @@ import datetime
 running = False
 #backlog = column[0]
 #done = column[num_columns - 1]
-lock = threading.Lock()
+lock = threading.Lock() #lock for thread safety
 
 
 def generate_columns(n):
@@ -22,6 +22,7 @@ def generate_task():
         if len(column[0]) <= max_tasks:
             i += 1
             task = {
+                #meta data for task
                 "id": i,
                 "name": f"Task {i}",
                 "created_at": datetime.datetime.fromtimestamp(time.time()).strftime("%H:%M:%S")
@@ -44,7 +45,7 @@ def process_tasks(col):
             time.sleep(random.randint(2,10))
 
             with lock:
-                while len(column[col+1]) >= max_tasks:
+                while len(column[col+1]) >= max_tasks + 1:
                     time.sleep(0.1)
                 
                 if task in column[col]:
@@ -67,10 +68,9 @@ def done_tasks():
                 print(f"Done: {column[num_columns - 1]}")
 
         if num_columns%2 != 0:
-            if len(column[num_columns - 2]) > 0:
-                if len(column[num_columns - 1]) >= max_tasks:
-                    column[num_columns - 1].pop(0)
-                    print(f"Done: {column[num_columns - 1]}")
+            if len(column[num_columns - 1]) > max_tasks:
+                column[num_columns - 1].pop(0)
+                print(f"Done: {column[num_columns - 1]}")
         else:
             time.sleep(0.1)
 
@@ -142,8 +142,8 @@ def reset_board():
 
     for i in range(num_columns-1):
         t.join()
-        done_tasks_thread.join()
-        generator_thread.join()
+    done_tasks_thread.join()
+    generator_thread.join()
 
     with lock:
         column = [[] for _ in range(num_columns)]

@@ -55,8 +55,8 @@ def board():
 def start():
     # NEW: Set running flag to True to start the simulation
     KB.running = True
-    # NEW: Restart threads in case they were stopped (e.g., after reset)
-    start_kanban_simulation()  # Restart threads if needed
+    KB.main()
+
 @app.route('/stop', methods=['POST'])
 def stop():
     # NEW: Check if running before stopping (safety check)
@@ -84,25 +84,7 @@ def reset():
         print(f"Error resetting board: {e}")
         return jsonify({"status": "Error resetting board", "error": str(e)}), 500
 
-def start_kanban_simulation():
-    """Start the Kanban simulation in background threads"""
-    # NEW: Start task generator thread if it's not already running
-    if KB.generator_thread is None or not KB.generator_thread.is_alive():
-        # NEW: Create thread that generates new tasks
-        KB.generator_thread = threading.Thread(target=KB.generate_task, daemon=True)
-        KB.generator_thread.start()
-    
-    # NEW: Start worker threads if they're not already running
-    if not KB.worker_threads or not any(t.is_alive() for t in KB.worker_threads):
-        KB.worker_threads = []
-        # NEW: Create threads for processing tasks through columns
-        for col in range(KB.num_columns):
-            if col % 2 != 0 and col < KB.num_columns - 1:
-                for i in range(KB.worker_count):
-                    # NEW: Each worker processes tasks in its assigned column
-                    t = threading.Thread(target=KB.process_tasks, args=(col,), daemon=True)
-                    t.start()
-                    KB.worker_threads.append(t)
+
 if __name__ == '__main__':
     # MAIN FUNCTION EXPLANATION:
     # Before: KB.main() had a blocking while True loop that prevented Flask from handling requests
@@ -129,9 +111,6 @@ if __name__ == '__main__':
     check_board_state()
     print("\n=== Starting Kanban Board ===\n")
     
-    # NEW: Start the simulation
-    KB.running = True
-    start_kanban_simulation()
     
     # NEW: Automatically open the Frontend in the default browser
     # Now opens localhost:5000 instead of 5500 (Flask serves the Frontend)
@@ -141,14 +120,13 @@ if __name__ == '__main__':
     # debug=False: Don't show debug mode (safer for production)
     # use_reloader=False: Don't reload on code changes (prevents double thread creation)
     app.run(debug=False, use_reloader=False, host='127.0.0.1', port=5000)
+
+    # NEW: Start the simulation
+    KB.running = True
+    start()
     
     print("\n=== Initial Board State ===")
     check_board_state()
     print("\n=== Starting Kanban Board ===\n")
     
-    # Start the simulation
-    KB.running = True
-    start_kanban_simulation()
     
-    # Start the Flask app
-    app.run(debug=False, use_reloader=False, host='127.0.0.1', port=5000)
