@@ -5,9 +5,9 @@ from flask_cors import CORS
 import webbrowser
 import Kanban as KB
 import json
-import threading
 import time
 import os
+import threading
 
 # NEW: Get the absolute path to the Frontend folder
 FRONTEND_PATH = os.path.join(os.path.dirname(__file__), '..', 'Frontend')
@@ -28,23 +28,55 @@ def serve_static(filename):
 def get_board_state():
     board_state = {}
     
-    # Check if columns exist in Kanban module
-    if hasattr(KB, 'column'):
+    if hasattr(KB, 'board_1') and KB.board_1 is not None:
         with KB.lock:
-            for i, col in enumerate(KB.column):
-                board_state[f"column_{i}"] = col.copy()
+            for i in range(len(KB.board_1.columns)):
+                column = KB.board_1.columns[i]
+                tasks = []
+                for task in column.tasks:
+                    tasks.append({
+                        "id": task.id,
+                        "name": task.name,
+                        "status": task.status,
+                        "created_at": task.created_at,
+                        "done_at": task.done_at,
+                        "worker_task": task.worker_task
+                    })
+                board_state[f"column_{i}"] = {
+                    "id": column.id,
+                    "name": column.name,
+                    "max_tasks": column.max_tasks,
+                    "workers": column.workers,
+                    "processing_time": column.processing_time,
+                    "tasks": tasks
+                }
     
     return board_state
 
-def check_board_state():
+def check_board_state(): #Print board state to terminal
     state = get_board_state()
     print(json.dumps(state, indent=4))
 
-def monitor_board_state():
+def monitor_board_state(): #Terminal display of board state
     """Continuously monitor and display board state"""
     while KB.running:
         check_board_state()
         time.sleep(2)  # Display state every 2 seconds
+
+#def get_user_config():
+    
+    #config = {
+        #for i in range(KB.num_columns):
+            #f"column_{i}": {
+                #"max_tasks": KB.board_1.columns[0].max_tasks,
+                #"worker_count": KB.worker_count,
+        #"num_columns": KB.num_columns
+    #}
+
+#@app.route('/config', methods=['GET'])
+#def config():
+    #config = get_user_config()
+    #return jsonify(config)
 
 @app.route('/board', methods=['GET'])
 def board():
@@ -53,9 +85,18 @@ def board():
 
 @app.route('/start', methods=['POST'])
 def start():
-    # NEW: Set running flag to True to start the simulation
-    KB.running = True
-    KB.main()
+    # Start Kanban simulation in a background thread
+    def run_kanban():
+        KB.main()
+    
+    kanban_thread = threading.Thread(target=run_kanban, daemon=True)
+    kanban_thread.start()
+    
+    # Start monitor in a background thread
+    monitor_thread = threading.Thread(target=monitor_board_state, daemon=True)
+    monitor_thread.start()
+    
+    return jsonify({"status": "Simulation started"})
 
 @app.route('/stop', methods=['POST'])
 def stop():
@@ -86,47 +127,14 @@ def reset():
 
 
 if __name__ == '__main__':
-    # MAIN FUNCTION EXPLANATION:
-    # Before: KB.main() had a blocking while True loop that prevented Flask from handling requests
-    # After: We now start simulation in background threads using start_kanban_simulation(), which
-    # creates daemon threads for task generation and processing. These threads run independently
-    # without blocking Flask, allowing the web server to stay responsive to Frontend API requests.
-    # This architecture enables Frontend-Backend communication: the Frontend periodically fetches
-    # the board state via /board endpoint, and buttons send control commands (/start, /stop, /reset)
-    # to manage the simulation.
+    print("\n=== Starting Flask Server ===")
+    print("Board state will be available at /board endpoint")
+    print("Use /start endpoint via POST request to begin simulation\n")
     
-    # NEW: Initialize board settings
-    KB.num_columns = 3
-    KB.worker_count = 2
-    KB.max_tasks = 5
-    
-    # NEW: Create empty columns for the board
-    KB.generate_columns(KB.num_columns)
-    # NEW: Initialize thread variables (needed for start/stop functionality)
-    KB.generator_thread = None
-    KB.worker_threads = []
-    KB.done_thread = None
-    
-    print("\n=== Initial Board State ===")
-    check_board_state()
-    print("\n=== Starting Kanban Board ===\n")
-    
-    
-    # NEW: Automatically open the Frontend in the default browser
-    # Now opens localhost:5000 instead of 5500 (Flask serves the Frontend)
+    # Automatically open the Frontend in the default browser
     webbrowser.open('http://127.0.0.1:5000/')
     
-    # NEW: Start Flask server on localhost:5000 (serves both Backend API and Frontend)
-    # debug=False: Don't show debug mode (safer for production)
-    # use_reloader=False: Don't reload on code changes (prevents double thread creation)
+    # Start Flask server on localhost:5000
     app.run(debug=False, use_reloader=False, host='127.0.0.1', port=5000)
-
-    # NEW: Start the simulation
-    KB.running = True
-    start()
-    
-    print("\n=== Initial Board State ===")
-    check_board_state()
-    print("\n=== Starting Kanban Board ===\n")
     
     

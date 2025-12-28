@@ -49,7 +49,7 @@ function updateBoardDisplay(data) {
             const card = document.createElement('div');
             card.className = 'card';
             // NEW: Display task name and when it was created
-            card.textContent = `${task.name} (${task.created_at})`;
+            card.textContent = `${task.id} (${task.created_at})`;
             cardsContainer.appendChild(card);
         });
     });
