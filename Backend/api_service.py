@@ -53,4 +53,7 @@ def get_board_data():
                 })
             board_state[f"column_{i}"] = tasks_list
     
+    print(f"DEBUG api_service.py - board_state keys: {list(board_state.keys())}")
+    print(f"DEBUG api_service.py - column_0 type: {type(board_state.get('column_0'))}")
+    print(f"DEBUG api_service.py - column_0 first item type: {type(board_state['column_0'][0]) if board_state.get('column_0') else 'EMPTY'}")
     return board_state

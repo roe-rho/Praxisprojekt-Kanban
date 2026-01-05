@@ -6,6 +6,7 @@ import datetime
 
 
 running = False
+tick_interval = 5  # Initialize tick_interval globally
 #backlog = column[0]
 #done = column[num_columns - 1]
 lock = threading.Lock() #lock for thread safety

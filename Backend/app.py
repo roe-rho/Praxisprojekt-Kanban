@@ -1,13 +1,9 @@
 from flask import Flask, jsonify, send_from_directory
-# NEW: Added CORS support so Frontend can talk to Backend from different ports
-from flask_cors import CORS
-# NEW: Import webbrowser to automatically open Frontend in browser
-import webbrowser
+from flask_cors import CORS # NEW: Added CORS support so Frontend can talk to Backend from different ports
+from api_service import get_board_data, start_simulation, stop_simulation, reset_simulation
+import webbrowser # NEW: Import webbrowser to automatically open Frontend in browser
 import Kanban as KB
-import json
-import time
 import os
-import threading
 
 # NEW: Get the absolute path to the Frontend folder
 FRONTEND_PATH = os.path.join(os.path.dirname(__file__), '..', 'Frontend')
@@ -25,116 +21,32 @@ def index():
 def serve_static(filename):
     return send_from_directory(FRONTEND_PATH, filename)
 
-def get_board_state():
-    board_state = {}
-    
-    if hasattr(KB, 'board_1') and KB.board_1 is not None:
-        with KB.lock:
-            for i in range(len(KB.board_1.columns)):
-                column = KB.board_1.columns[i]
-                tasks = []
-                for task in column.tasks:
-                    tasks.append({
-                        "id": task.id,
-                        "name": task.name,
-                        "status": task.status,
-                        "created_at": task.created_at,
-                        "done_at": task.done_at,
-                        "worker_task": task.worker_task
-                    })
-                board_state[f"column_{i}"] = {
-                    "id": column.id,
-                    "name": column.name,
-                    "max_tasks": column.max_tasks,
-                    "workers": column.workers,
-                    "processing_time": column.processing_time,
-                    "tasks": tasks
-                }
-    
-    return board_state
-
-def check_board_state(): #Print board state to terminal
-    state = get_board_state()
-    print(json.dumps(state, indent=4))
-
-def monitor_board_state(): #Terminal display of board state
-    """Continuously monitor and display board state"""
-    while KB.running:
-        check_board_state()
-        time.sleep(2)  # Display state every 2 seconds
-
-#def get_user_config():
-    
-    #config = {
-        #for i in range(KB.num_columns):
-            #f"column_{i}": {
-                #"max_tasks": KB.board_1.columns[0].max_tasks,
-                #"worker_count": KB.worker_count,
-        #"num_columns": KB.num_columns
-    #}
-
-#@app.route('/config', methods=['GET'])
-#def config():
-    #config = get_user_config()
-    #return jsonify(config)
-
+#define API endpoints for starting, stopping, resetting simulation and getting board data
+#defined in api_service.py
 @app.route('/board', methods=['GET'])
 def board():
-    state = get_board_state()
-    return jsonify(state)
+    print("\n\n===== FLASK BOARD ENDPOINT CALLED =====\n\n")
+    data = get_board_data()
+    print(f"DEBUG: get_board_data function exists: {callable(get_board_data)}")
+    print(f"\n===== RETURNING DATA: {list(data.keys())} =====\n\n")
+    return jsonify(data)
 
 @app.route('/start', methods=['POST'])
 def start():
-    # Start Kanban simulation in a background thread
-    def run_kanban():
-        KB.main()
-    
-    kanban_thread = threading.Thread(target=run_kanban, daemon=True)
-    kanban_thread.start()
-    
-    # Start monitor in a background thread
-    monitor_thread = threading.Thread(target=monitor_board_state, daemon=True)
-    monitor_thread.start()
-    
-    return jsonify({"status": "Simulation started"})
+    return jsonify(start_simulation())
 
 @app.route('/stop', methods=['POST'])
 def stop():
-    # NEW: Check if running before stopping (safety check)
-    if KB.running:
-        # NEW: Set running flag to False - this stops all threads gracefully
-        KB.running = False
-    # NEW: Return JSON response so Frontend knows it worked
-    return jsonify({"status": "Simulation stopped"})
+    return jsonify(stop_simulation())
 
 @app.route('/reset', methods=['POST'])
 def reset():
-    try:
-        # NEW: Stop the simulation first
-        KB.running = False
-        # NEW: Use thread lock to safely clear all columns
-        with KB.lock:
-            # NEW: Loop through all columns and empty them
-            for i in range(len(KB.column)):
-                KB.column[i] = []
-        print("Board has been reset.")
-        # NEW: Return success message
-        return jsonify({"status": "Board reset"})
-    except Exception as e:
-        # NEW: Error handling - if something goes wrong, return error message
-        print(f"Error resetting board: {e}")
-        return jsonify({"status": "Error resetting board", "error": str(e)}), 500
+    return jsonify(reset_simulation())
 
 
 if __name__ == '__main__':
-    print("\n=== Starting Flask Server ===")
-    print("Board state will be available at /board endpoint")
-    print("Use /start endpoint via POST request to begin simulation\n")
-    
-    # Automatically open the Frontend in the default browser
-    webbrowser.open('http://127.0.0.1:5000/')
-    
-    # Start Flask server on localhost:5000
-    app.run(debug=False, use_reloader=False, host='127.0.0.1', port=5000)
-    
-    
+   KB.num_columns = 3  # Set number of columns before starting
+   KB.generate_columns(KB.num_columns)
+
+   webbrowser.open('http://127.0.0.1:5000/')
+   app.run(debug = False, use_reloader = False, host='127.0.0.1', port=5000)  # Ensure use_reloader is False to avoid double-starting threads
