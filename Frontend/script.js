@@ -119,7 +119,7 @@ resetBtn.addEventListener('mouseleave', function() {
 });
 
 // NEW: Automatically fetch board state every 2 seconds to keep UI in sync with Backend
-setInterval(fetchBoardState, 500);
+setInterval(fetchBoardState, 100);
 
 // NEW: Start with Stop button disabled (simulation must start first)
 stopBtn.disabled = true;

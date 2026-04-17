@@ -26,16 +26,22 @@ class Column:
         return f"Column(id={self.id}, name='{self.name}', tasks={len(self.tasks)}/{self.max_tasks}, workers={self.workers}), processing_time={self.processing_time})"
 
 class Task:
-    def __init__(self, id, name, created_at, done_at=None, worker_task=None, status=None):
+    def __init__(self, id, name, created_at, done_at=None, worker_task=None, status=None, processing_duration=None):
         self.id = id
         self.name = name
         self.created_at = created_at
         self.done_at = done_at
         self.worker_task = worker_task
         self.status = status
+        self.processing_duration = processing_duration #start from when the task starts processing until it reaches the end column.
+
+        #lead time = done_at - created_at
+        #cycle time = processing_duration
+        #throughput = number of tasks completed in a given time period ie. per day, per week, etc.
+        #WIP = total tasks currently being processed in the columns (not including backlog and done)
     
     def __repr__(self):
-        return f"Task(id={self.id}, name='{self.name}', created_at='{self.created_at}', done_at='{self.done_at}', worker_task='{self.worker_task}', status='{self.status}')"
+        return f"Task(id={self.id}, name='{self.name}', created_at='{self.created_at}', done_at='{self.done_at}', worker_task='{self.worker_task}', status='{self.status}', processing_duration='{self.processing_duration}')"
 
 class Board:
     def __init__(self, total_columns):
@@ -76,7 +82,7 @@ def generate_columns(n):
             name=f"Column {i}",
             max_tasks=5,
             workers_column=2,
-            processing_time=random.randint(3,12)*tick_interval
+            processing_time=10*tick_interval
         )
         #print(f"Generated column {i}")
         board_1.columns.append(col)
@@ -101,6 +107,10 @@ def process_tasks(col):
         task = board_1.columns[col - 1].tasks.pop(0)
         board_1.columns[col].tasks.append(task)
 
+            
+    
+
+
     if len(board_1.columns[col].tasks) > 0:
         # Iterate backwards to safely remove items during iteration
         for i in range(len(board_1.columns[col].tasks) - 1, -1, -1):
@@ -108,7 +118,9 @@ def process_tasks(col):
             if task.status is None:
                 task.status = board_1.columns[col].processing_time
             
+
             task.status = task.status - tick_interval
+            #task.processing_duration = task.processing_duration + tick_interval
             #print(f"Processing Task {task.id} in Column {col}, Time left: {task.status}")
     
    
@@ -286,7 +298,9 @@ def test_board():
                 
             for i in range(num_columns):
                 tasks_display = [f"{task.name} (status: {task.status})" for task in board_1.columns[i].tasks]
+                tasks_processing = [f"{task.name} (processing duration: {task.processing_duration})" for task in board_1.columns[i].tasks if task.status is not None and task.status < board_1.columns[i].processing_time]
                 print(f"\nColumn {i}: {tasks_display}\n")
+                print(f"Column {i} processing tasks: {tasks_processing}\n")
             done_tasks()
             time.sleep(tick_interval)
 
