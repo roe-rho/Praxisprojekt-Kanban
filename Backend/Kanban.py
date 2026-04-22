@@ -12,41 +12,36 @@ tick_interval = 5  # Initialize tick_interval globally
 lock = threading.Lock() #lock for thread safety
 
 ######################################################################################################################################################################################################################################
-
+#Classes
 class Column:
     def __init__(self, id, name, max_tasks, workers_column, processing_time):
-        self.id = id
-        self.name = name
-        self.tasks = []
-        self.max_tasks = max_tasks
-        self.workers = workers_column
-        self.processing_time = processing_time
+        self.id = id #Column ID
+        self.name = name #Column name
+        self.tasks = [] #List of tasks currently in the column
+        self.max_tasks = max_tasks #Maximum number of tasks that can be in the column at once (WIP limit)
+        self.workers = workers_column #Number of workers assigned to the column (Unused)
+        self.processing_time = processing_time #Time it takes to process a task in the column
     
     def __repr__(self):
         return f"Column(id={self.id}, name='{self.name}', tasks={len(self.tasks)}/{self.max_tasks}, workers={self.workers}), processing_time={self.processing_time})"
 
 class Task:
     def __init__(self, id, name, created_at, done_at=None, worker_task=None, status=None, processing_duration=None):
-        self.id = id
-        self.name = name
-        self.created_at = created_at
-        self.done_at = done_at
-        self.worker_task = worker_task
-        self.status = status
+        self.id = id #Task ID
+        self.name = name #Task name
+        self.created_at = created_at #Time the task was created
+        self.done_at = done_at #Time the task was completed
+        self.worker_task = worker_task #Worker assigned to the task
+        self.status = status #Current status of the task
         self.processing_duration = processing_duration #start from when the task starts processing until it reaches the end column.
-
-        #lead time = done_at - created_at
-        #cycle time = processing_duration
-        #throughput = number of tasks completed in a given time period ie. per day, per week, etc.
-        #WIP = total tasks currently being processed in the columns (not including backlog and done)
     
     def __repr__(self):
         return f"Task(id={self.id}, name='{self.name}', created_at='{self.created_at}', done_at='{self.done_at}', worker_task='{self.worker_task}', status='{self.status}', processing_duration='{self.processing_duration}')"
 
 class Board:
     def __init__(self, total_columns):
-        self.columns = []
-        self.total_columns = total_columns
+        self.columns = []   #List of columns in the board
+        self.total_columns = total_columns  #Total number of columns in the board
 
 ########################################################################################################################################################################################################################################
 
@@ -57,16 +52,19 @@ def tick_manager():
     global clock
     global day
 
-    tick = tick + 1
-    clock = clock + 0.10
+    #Time and tick management
+    tick = tick + 1 #Every tick interval, the tick count increases by 1
+    clock = clock + 0.10 #Every tick adds 10 minutes to the clock
+
+    #If the minutes exceed 60, we add 40 minutes to the clock to move to the next hour
     if clock%1 >= 0.60:
         clock = clock + 0.40
 
+    #If the clock exceeds 5 PM, we reset it to 9 AM and move to the next day (assuming a 9-5 workday)
     if clock >= 17.00:
         clock = 9.00
         day = day + 1
 
-    #print(f"Time: {round(clock, 3)}, Day: {day}, Tick: {tick}")
 
 def generate_columns(n):
     global num_columns
@@ -74,23 +72,25 @@ def generate_columns(n):
     global tick_interval
     num_columns = n
 
+    #Generate n number of columns (Unused, default = 3)
     board_1 = Board(total_columns=n)
     
+    #Assign column attributes (i = number ie. Column 0, 1, 2, etc)
     for i in range(n):
         col = Column(
             id=i,
             name=f"Column {i}",
             max_tasks=5,
-            workers_column=2,
-            processing_time=10*tick_interval
+            workers_column=2,   #Unused, default = 2 workers per column
+            processing_time=10*tick_interval    #Default processing time is 10 ticks (10 seconds if tick_interval is 1 second)
         )
-        #print(f"Generated column {i}")
+        
         board_1.columns.append(col)
 
-def generate_task():
+def generate_task(): #In Backlog (Column 0)
     global id
 
-    
+    #If the backlog (column 0) has space for more tasks, generate a new task and add it to the backlog
     if len(board_1.columns[0].tasks) < board_1.columns[0].max_tasks:
         id = id+1
         task = Task(
@@ -99,57 +99,53 @@ def generate_task():
             created_at=f"Day: {day}, Time: {round(clock, 3)}"
         )
         board_1.columns[0].tasks.append(task)
-        #print(column[0])
-        #print(f"Backlog: {board_1.columns[0].tasks}\n")
+        
 
-def process_tasks(col):
+def process_tasks(col): # For columns 1 to n-2, process tasks and move them to the next column if they are done
+
+#If the previous column has tasks and the current column has space, move a task from the previous column to the current column
+
     if len(board_1.columns[col - 1].tasks) > 0 and len(board_1.columns[col].tasks) < board_1.columns[col].max_tasks:
-        task = board_1.columns[col - 1].tasks.pop(0)
-        board_1.columns[col].tasks.append(task)
+        task = board_1.columns[col - 1].tasks.pop(0)    #Remove the first task from the previous column
+        board_1.columns[col].tasks.append(task)     #Add the task to the current column
 
             
-    
-
-
     if len(board_1.columns[col].tasks) > 0:
         # Iterate backwards to safely remove items during iteration
         for i in range(len(board_1.columns[col].tasks) - 1, -1, -1):
             task = board_1.columns[col].tasks[i]
+
+            #If the task has just been moved to the column and has no status, set its status to the processing time of the column
             if task.status is None:
                 task.status = board_1.columns[col].processing_time
             
 
-            task.status = task.status - tick_interval
-            #task.processing_duration = task.processing_duration + tick_interval
-            #print(f"Processing Task {task.id} in Column {col}, Time left: {task.status}")
+            task.status = task.status - tick_interval   #Decrease the task's status by the tick interval to simulate processing time
     
-   
+            #If task is done (status <= 0) and it's not the last column, move it to the next column if there is space
             if task.status <= 0 and i == 0:
                 if col + 2 < num_columns and  len(board_1.columns[col + 1].tasks) < board_1.columns[col + 1].max_tasks:
                     board_1.columns[col].tasks.remove(task)
                     board_1.columns[col + 1].tasks.append(task)
                     task.status = None
                 
-                elif col + 2 >= num_columns:
+                elif col + 2 >= num_columns: #Potential redundancy, but ensures that tasks in the second to last column can move to the last column even if the last column is full.
                     board_1.columns[col].tasks.remove(task)
                     board_1.columns[col + 1].tasks.append(task)
                     task.status = None
 
 
-    
-    #print(f"Column {col}: {len(board_1.columns[col].tasks)}")
-    #if col + 1 < num_columns:
-        #print(f"Column {col + 1}: {len(board_1.columns[col + 1].tasks)}")
 
             
 
 def done_tasks():
+    #If the last column has tasks and the first task in the last column is done, remove it from the board and set its done_at time
     if num_columns%2 != 0:
         if len(board_1.columns[num_columns - 1].tasks) >= board_1.columns[num_columns - 1].max_tasks:
              
             task = board_1.columns[num_columns - 1].tasks.pop(0)
             task.done_at = f"Day: {day}, Time: {round(clock, 3)}"
-            #print(f"Done: {board_1.columns[num_columns - 1].tasks}")
+            
 
 
     
@@ -167,7 +163,7 @@ def main():
     global clock
     global day
     running = True
-    tick_interval = 1  # 1 second per tick for testing
+    tick_interval = 1  # 1 second per tick default
     tick = 0
     id = 0
     clock = 9.00
@@ -183,9 +179,6 @@ def main():
         for i in range(num_columns):
             if i%2 != 0 and i < num_columns - 1:
                 process_tasks(i)
-        #for i in range(num_columns):
-            #task_display = [f"{task.name} (status: {task.status})" for task in board_1.columns[i].tasks]
-            #print(f"\nColumn {i}: {task_display}\n")
         done_tasks()
         time.sleep(tick_interval)
 
