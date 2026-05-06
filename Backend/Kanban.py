@@ -2,14 +2,18 @@ import time
 import threading
 import random
 import datetime
+import json
+import os
 
-
+# NEW: Thread lock for safe access to shared board data
+lock = threading.Lock()
 
 running = False
-tick_interval = 5  # Initialize tick_interval globally
+config_updated = False
+initial_gen = False
+tick_interval = 1  # Initialize tick_interval globally
 #backlog = column[0]
 #done = column[num_columns - 1]
-lock = threading.Lock() #lock for thread safety
 
 ######################################################################################################################################################################################################################################
 #Classes
@@ -57,7 +61,7 @@ def tick_manager():
     clock = clock + 0.10 #Every tick adds 10 minutes to the clock
 
     #If the minutes exceed 60, we add 40 minutes to the clock to move to the next hour
-    if clock%1 >= 0.60:
+    if clock%1 >= 0.50:
         clock = clock + 0.40
 
     #If the clock exceeds 5 PM, we reset it to 9 AM and move to the next day (assuming a 9-5 workday)
@@ -72,20 +76,48 @@ def generate_columns(n):
     global tick_interval
     num_columns = n
 
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(backend_dir, 'config.json')
+
+    if not os.path.exists(config_path):
+        print(f"Config file not found at {config_path}. Using default configuration.")
+        return
+    
+    try:
+        with open(config_path, 'r') as f:
+            new_config = json.load(f)
+        
+        print(f"DEBUG update_column_config - Loaded config: {new_config}")
+    except Exception as e:
+        print(f"Error loading config: {e}. Using default configuration.")
+
     #Generate n number of columns (Unused, default = 3)
     board_1 = Board(total_columns=n)
     
     #Assign column attributes (i = number ie. Column 0, 1, 2, etc)
     for i in range(n):
+        
         col = Column(
             id=i,
             name=f"Column {i}",
-            max_tasks=5,
+            max_tasks=5,  # Get WIP limit from config.json
             workers_column=2,   #Unused, default = 2 workers per column
             processing_time=10*tick_interval    #Default processing time is 10 ticks (10 seconds if tick_interval is 1 second)
         )
+
+        if config_updated == True:
+            col.max_tasks = int(new_config.get(f"column_{i}", col.max_tasks))  # Update max_tasks if config has been updated
+            
+
+
         
         board_1.columns.append(col)
+    
+
+
+
+
+        
 
 def generate_task(): #In Backlog (Column 0)
     global id
@@ -141,10 +173,11 @@ def process_tasks(col): # For columns 1 to n-2, process tasks and move them to t
 def done_tasks():
     #If the last column has tasks and the first task in the last column is done, remove it from the board and set its done_at time
     if num_columns%2 != 0:
-        if len(board_1.columns[num_columns - 1].tasks) >= board_1.columns[num_columns - 1].max_tasks:
+        if len(board_1.columns[num_columns - 1].tasks) >= board_1.columns[num_columns - 1].max_tasks + 1:
              
             task = board_1.columns[num_columns - 1].tasks.pop(0)
             task.done_at = f"Day: {day}, Time: {round(clock, 3)}"
+
             
 
 
@@ -162,24 +195,45 @@ def main():
     global id
     global clock
     global day
-    running = True
+    global config_updated
+    global initial_gen
+    #running = True
     tick_interval = 1  # 1 second per tick default
     tick = 0
     id = 0
     clock = 9.00
     day = 1
+    initial_gen = False
 
     num_columns = 3
 
-    generate_columns(num_columns)
+    
+    if running == True:
+        print("Running...")
+    
+    if initial_gen == False:
+        generate_columns(num_columns)
+        initial_gen = True
+        config_updated = False
+    
+    if initial_gen == True and config_updated == True:
+        generate_columns(num_columns)
+        config_updated = False
+
+
+    
 
     while running:
+        
         tick_manager()
         generate_task()
         for i in range(num_columns):
             if i%2 != 0 and i < num_columns - 1:
                 process_tasks(i)
         done_tasks()
+        if running == False:
+            #print("Stopped.")
+            break
         time.sleep(tick_interval)
 
 
@@ -296,6 +350,23 @@ def test_board():
                 print(f"Column {i} processing tasks: {tasks_processing}\n")
             done_tasks()
             time.sleep(tick_interval)
+
+    #Test all
+    if test == 6 or test == 10:
+        num_columns = 3
+        generate_columns(num_columns)
+        while running:
+            tick_manager()
+            generate_task()
+            for i in range(num_columns):
+                if i%2 != 0 and i < num_columns - 1:
+                    process_tasks(i)
+            for i in range(num_columns):
+                tasks_display = [f"{task.name} (status: {task.status})" for task in board_1.columns[i].tasks]
+                print(f"\nColumn {i}: {tasks_display}\n")
+            done_tasks()
+            time.sleep(tick_interval)
+        
 
  
 

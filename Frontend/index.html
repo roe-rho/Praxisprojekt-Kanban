@@ -14,24 +14,31 @@
         <button id = "start-btn">Start Simulation</button>
         <button id = "stop-btn">Stop Simulation</button>
         <button id = "reset-btn">Reset Simulation</button>
-
+        <button id = "update-btn">Update Configuration</button>
+        
 
     </div>
+
+    <div class = "time-and-day">
+        <div id="clock">Time: 0</div>
+        <div id="day">Day: 0</div>
+    </div>
+
     <main>
         <section id="kanban-board">
             <div class="column" id="col-backlog">
                 <h2>To Do</h2>
-                <div><input id="Backlog" type="number" value="2" min="1" style="width: 40px"><div class="count"></div></div>
+                <div>WIP Limit:<input id="column_0" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
                 <div class="cards"></div>
             </div>
             <div class="column" id="col-doing">
                 <h2>Doing</h2>
-                <div><input id="Doing" type="number" value="2" min="1" style="width: 40px"><div class="count"></div></div>
+                <div>WIP Limit:<input id="column_1" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
                 <div class="cards"></div>
             </div>
             <div class="column" id="col-testing">
                 <h2>Done</h2>
-                <div><input id="Testing" type="number" value="2" min="1" style="width: 40px"><div class="count"></div></div>
+                <div>WIP Limit:<input id="column_2" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
                 <div class="cards"></div>
             </div>
         </section>

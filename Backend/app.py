@@ -1,6 +1,6 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, json, jsonify, request, send_from_directory
 from flask_cors import CORS # NEW: Added CORS support so Frontend can talk to Backend from different ports
-from api_service import get_board_data, start_simulation, stop_simulation, reset_simulation
+from api_service import get_board_data, start_simulation, stop_simulation, reset_simulation, get_clock_and_day, update_config
 import webbrowser # NEW: Import webbrowser to automatically open Frontend in browser
 import Kanban as KB
 import os
@@ -25,11 +25,13 @@ def serve_static(filename):
 #defined in api_service.py
 @app.route('/board', methods=['GET'])
 def board():
-    print("\n\n===== FLASK BOARD ENDPOINT CALLED =====\n\n")
+    #print("\n\n===== FLASK BOARD ENDPOINT CALLED =====\n\n")
     data = get_board_data()
-    print(f"DEBUG: get_board_data function exists: {callable(get_board_data)}")
-    print(f"\n===== RETURNING DATA: {list(data.keys())} =====\n\n")
+    #print(f"DEBUG: get_board_data function exists: {callable(get_board_data)}")
+    #print(f"\n===== RETURNING DATA: {list(data.keys())} =====\n\n")
     return jsonify(data)
+
+
 
 @app.route('/start', methods=['POST'])
 def start():
@@ -42,6 +44,41 @@ def stop():
 @app.route('/reset', methods=['POST'])
 def reset():
     return jsonify(reset_simulation())
+
+@app.route('/clock-and-day', methods=['GET'])
+def clock_and_day():
+    #print("\n\n===== FLASK CLOCK_AND_DAY ENDPOINT CALLED =====\n\n")
+    data2 = get_clock_and_day()  # Call the revised function
+    #print(f"DEBUG: get_clock_and_day function exists: {callable(get_clock_and_day)}")
+    #print(f"\n===== RETURNING DATA: {list(data2.keys())} =====\n\n")
+    return jsonify(data2)
+
+@app.route('/update-config', methods=['POST'])
+def update_config():
+    try:
+        new_config = request.get_json()
+        if new_config is None:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        # Get the Backend directory path
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        config_path = os.path.join(backend_dir, 'config.json')
+        
+        # Save config to file
+        with open(config_path, 'w') as f:
+            json.dump(new_config, f, indent=2)
+        
+        # Signal that config has been updated so columns will regenerate
+        KB.config_updated = True
+        
+        return jsonify({"status": "Config updated successfully", "config": new_config})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
+
+
+    
 
 
 if __name__ == '__main__':

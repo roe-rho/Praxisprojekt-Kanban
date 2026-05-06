@@ -2,6 +2,7 @@
 const startBtn = document.getElementById('start-btn');
 const stopBtn = document.getElementById('stop-btn');
 const resetBtn = document.getElementById('reset-btn');
+const updateBtn = document.getElementById('update-btn');
 
 // NEW: URL where Backend Flask server is running (must match app.run() host:port)
 const API_URL = 'http://localhost:5000';
@@ -22,6 +23,19 @@ async function fetchBoardState() {
     } catch (error) {
         // NEW: Log any errors (e.g., if server is not running)
         console.error('Error fetching board:', error);
+    }
+}
+
+async function fetchClockAndDay() {
+    try {
+        // NEW: Make GET request to /clock-and-day endpoint to get clock and day
+        const response = await fetch(`${API_URL}/clock-and-day`);
+        const data2 = await response.json();
+        // NEW: Update the display with the fetched clock and day (formatted to 2 decimal places)
+        document.getElementById('clock').textContent = `Clock: ${parseFloat(data2.clock).toFixed(2)}`;
+        document.getElementById('day').textContent = `Day: ${data2.day}`;
+    } catch (error) {
+        console.error('Error fetching clock and day:', error);
     }
 }
 
@@ -49,7 +63,7 @@ function updateBoardDisplay(data) {
             const card = document.createElement('div');
             card.className = 'card';
             // NEW: Display task name and when it was created
-            card.textContent = `${task.id} (${task.created_at})`;
+            card.textContent = `Task ${task.id} (${task.created_at}) (${task.status})`;
             cardsContainer.appendChild(card);
         });
     });
@@ -78,6 +92,7 @@ startBtn.addEventListener('click', function() {
     callAPI('/start');
     isRunning = true;
     console.log('Kanban simulation started');
+    window.alert('Start button clicked.');
     // NEW: Disable Start button, enable Stop button
     startBtn.disabled = true;
     stopBtn.disabled = false;
@@ -89,6 +104,7 @@ stopBtn.addEventListener('click', function() {
     callAPI('/stop');
     isRunning = false;
     console.log('Kanban simulation stopped');
+    //window.alert('Stop button clicked.');
     // NEW: Enable Start button, disable Stop button
     startBtn.disabled = false;
     stopBtn.disabled = true;
@@ -118,8 +134,56 @@ resetBtn.addEventListener('mouseleave', function() {
     clearTimeout(holdTimer);
 });
 
+updateBtn.addEventListener('click', async function() {
+    // NEW: Placeholder for future configuration update logic
+    const newWIPLimits = {
+        column_0: document.getElementById('column_0').value,
+        column_1: document.getElementById('column_1').value,
+        column_2: document.getElementById('column_2').value
+    };
+
+    if (newWIPLimits.column_0 < 1 || newWIPLimits.column_1 < 1 || newWIPLimits.column_2 < 1) {
+        window.alert('WIP limits must be at least 1.');
+        return;
+    }   
+
+    try {
+        const response = await fetch(`${API_URL}/update-config`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newWIPLimits)
+        });
+
+        const data = await response.json();
+
+        if (data.success){
+            console.log('Configuration updated successfully:', data);
+            window.alert('Configuration updated successfully.');
+        }
+
+    } catch (error) {
+        console.error('Error updating configuration:', error);
+        window.alert('Error updating configuration. Please try again.');
+    }
+
+    callAPI('/stop');
+    isRunning = false;
+
+    callAPI('/reset');
+
+    callAPI('/update-config');
+
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+
+    window.alert(`Update button clicked. New WIP limits: Backlog=${newWIPLimits.column_0}, Doing=${newWIPLimits.column_1}, Done=${newWIPLimits.column_2}`);
+});
+
 // NEW: Automatically fetch board state every 2 seconds to keep UI in sync with Backend
 setInterval(fetchBoardState, 100);
+
+// NEW: Automatically fetch clock and day every 1 second
+setInterval(fetchClockAndDay, 100);
 
 // NEW: Start with Stop button disabled (simulation must start first)
 stopBtn.disabled = true;
