@@ -76,20 +76,7 @@ def generate_columns(n):
     global tick_interval
     num_columns = n
 
-    #backend_dir = os.path.dirname(os.path.abspath(__file__))
-    #config_path = os.path.join(backend_dir, 'config.json')
-
-    #if not os.path.exists(config_path):
-        #print(f"Config file not found at {config_path}. Using default configuration.")
-        #return
     
-    #try:
-        #with open(config_path, 'r') as f:
-            #new_config = json.load(f)
-        
-        #print(f"DEBUG update_column_config - Loaded config: {new_config}")
-    #except Exception as e:
-        #print(f"Error loading config: {e}. Using default configuration.")
 
     #Generate n number of columns (Unused, default = 3)
     board_1 = Board(total_columns=n)
@@ -105,18 +92,16 @@ def generate_columns(n):
             processing_time=10*tick_interval    #Default processing time is 10 ticks (10 seconds if tick_interval is 1 second)
         )
 
-        #if config_updated == True:
-            #col.max_tasks = int(new_config.get(f"column_{i}", col.max_tasks))  # Update max_tasks if config has been updated
-            
-
-
+        if col.id == 0 or col.id == n-1:
+            col.processing_time = 0  # Set processing time to 0 for the first and last columns
+            col.workers = 0  # Set workers to 0 for the first and last columns since they don't process tasks
         
         board_1.columns.append(col)
     
 
 
 
-def update_WIP_limit():
+def update_config():
      
     backend_dir = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(backend_dir, 'config.json')
@@ -135,6 +120,12 @@ def update_WIP_limit():
     
     for i in range(num_columns):       
         board_1.columns[i].max_tasks = int(new_config.get(f"column_{i}"))
+        if i != 0 and i != num_columns - 1:
+            for j in range(len(board_1.columns[i].tasks)-1, -1, -1):
+                task = board_1.columns[i].tasks[j]
+                if task.worker_task > 0:
+                    task.worker_task = 0
+            board_1.columns[i].workers = int(new_config.get(f"workers_{i}", board_1.columns[i].workers))  # Update workers if specified in config, otherwise keep current value
         
 
 def generate_task(): #In Backlog (Column 0)
@@ -146,7 +137,8 @@ def generate_task(): #In Backlog (Column 0)
         task = Task(
             id=id,
             name=f"Task {id}",
-            created_at=f"Day: {day}, Time: {round(clock, 3)}"
+            created_at=f"Day: {day}, Time: {round(clock, 3)}",
+            worker_task = 0
         )
         board_1.columns[0].tasks.append(task)
         
@@ -162,28 +154,44 @@ def process_tasks(col): # For columns 1 to n-2, process tasks and move them to t
             
     if len(board_1.columns[col].tasks) > 0:
         # Iterate backwards to safely remove items during iteration
-        for i in range(len(board_1.columns[col].tasks) - 1, -1, -1):
+        for i in range(len(board_1.columns[col].tasks) -1, -1, -1):
             task = board_1.columns[col].tasks[i]
+
 
             #If the task has just been moved to the column and has no status, set its status to the processing time of the column
             if task.status is None:
                 task.status = board_1.columns[col].processing_time
-            
 
-            task.status = task.status - tick_interval   #Decrease the task's status by the tick interval to simulate processing time
+            
+            #if task.worker_task == 0 and board_1.columns[col].workers > 0:
+                #task.worker_task = 1
+                #board_1.columns[col].workers -= 1  # Assign a worker to the task and decrease available workers in the column
+
+            
+            if task.worker_task > 0:
+                task.status = task.status - tick_interval   #Decrease the task's status by the tick interval to simulate processing time
     
             #If task is done (status <= 0) and it's not the last column, move it to the next column if there is space
             if task.status <= 0 and i == 0:
                 if col + 2 < num_columns and  len(board_1.columns[col + 1].tasks) < board_1.columns[col + 1].max_tasks:
+                    task.worker_task = 0  # Unassign worker from the task
+                    board_1.columns[col].workers += 1  # Increase available workers in the current column
                     board_1.columns[col].tasks.remove(task)
                     board_1.columns[col + 1].tasks.append(task)
                     task.status = None
                 
                 elif col + 2 >= num_columns: #Potential redundancy, but ensures that tasks in the second to last column can move to the last column even if the last column is full.
+                    task.worker_task = 0  # Unassign worker from the task
+                    board_1.columns[col].workers += 1  # Increase available workers in the current column
                     board_1.columns[col].tasks.remove(task)
                     board_1.columns[col + 1].tasks.append(task)
                     task.status = None
 
+        for i in range(len(board_1.columns[col].tasks)):
+            task = board_1.columns[col].tasks[i]
+            if task.worker_task == 0 and board_1.columns[col].workers > 0:
+                task.worker_task = 1
+                board_1.columns[col].workers -= 1
 
 
             
@@ -233,7 +241,7 @@ def main():
 
     
     if config_updated == True:
-        update_WIP_limit()
+        update_config()
         config_updated = False
 
 
@@ -241,7 +249,7 @@ def main():
 
     while running:
         if config_updated == True:
-            update_WIP_limit()
+            update_config()
             config_updated = False
         tick_manager()
         generate_task()
@@ -392,9 +400,43 @@ def test_board():
             time.sleep(tick_interval)
             x=x+1
 
+    #Worker assignment test
+    if test==7:
+        num_columns = 3
+        z= 0
+        generate_columns(num_columns)
+
+        for i in range(num_columns):
+            if i != 0 and i != num_columns - 1:
+                board_1.columns[i].workers = 2  # Set 2 workers for middle columns
+                print(f"Initial workers for Column {i}: {board_1.columns[i].workers}")
+        while running:
+            tick_manager()
+            generate_task()
+            for i in range(num_columns):
+                if i%2 != 0 and i < num_columns - 1:
+                    if z == 10:
+                            for j in range(num_columns):
+                                if j != 0 and j != num_columns - 1:
+                                    update_config()    # Randomize workers every 10 ticks
+                                    print(f"Updated workers for Column {j}: {board_1.columns[j].workers}")
+                            z = 0
+                    process_tasks(i)
+
+            for i in range(num_columns):
+                tasks_display = [f"{task.name} (status: {task.status})" for task in board_1.columns[i].tasks]
+                task_workers = [f"{task.name} (worker assigned: {task.worker_task})" for task in board_1.columns[i].tasks]
+                print(f"\nColumn {i}: {tasks_display}\n")
+                print(f"Column {i} workers ({board_1.columns[i].workers}): {task_workers}\n")
+            done_tasks()
+            z=z+1
+            time.sleep(tick_interval)
+
+
+
 
     #Test all
-    if test == 7 or test == 10:
+    if test == 8 or test == 10:
         num_columns = 3
         generate_columns(num_columns)
         while running:

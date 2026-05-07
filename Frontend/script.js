@@ -63,7 +63,7 @@ function updateBoardDisplay(data) {
             const card = document.createElement('div');
             card.className = 'card';
             // NEW: Display task name and when it was created
-            card.textContent = `Task ${task.id} (${task.created_at}) (${task.status})`;
+            card.textContent = `Task ${task.id} (${task.created_at}) (${task.status}) (Worker: ${task.worker_task})`;
             cardsContainer.appendChild(card);
         });
     });
@@ -136,14 +136,15 @@ resetBtn.addEventListener('mouseleave', function() {
 
 updateBtn.addEventListener('click', async function() {
     // NEW: Placeholder for future configuration update logic
-    const newWIPLimits = {
+    const newconfig = {
         column_0: document.getElementById('column_0').value,
         column_1: document.getElementById('column_1').value,
-        column_2: document.getElementById('column_2').value
+        column_2: document.getElementById('column_2').value,
+        workers_1: document.getElementById('workers_1').value
     };
 
-    if (newWIPLimits.column_0 < 1 || newWIPLimits.column_1 < 1 || newWIPLimits.column_2 < 1) {
-        window.alert('WIP limits must be at least 1.');
+    if (newconfig.column_0 < 1 || newconfig.column_1 < 1 || newconfig.column_2 < 1 || newconfig.workers_1 < 1) {
+        window.alert('WIP limits and worker counts must be at least 1.');
         return;
     }   
 
@@ -151,7 +152,7 @@ updateBtn.addEventListener('click', async function() {
         const response = await fetch(`${API_URL}/update-config`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newWIPLimits)
+            body: JSON.stringify(newconfig)
         });
 
         const data = await response.json();
@@ -166,17 +167,8 @@ updateBtn.addEventListener('click', async function() {
         window.alert('Error updating configuration. Please try again.');
     }
 
-    /*callAPI('/stop');
-    isRunning = false;
 
-    callAPI('/reset');
-
-    callAPI('/update-config');
-
-    startBtn.disabled = false;
-    stopBtn.disabled = true;*/
-
-    window.alert(`Update button clicked. New WIP limits: Backlog=${newWIPLimits.column_0}, Doing=${newWIPLimits.column_1}, Done=${newWIPLimits.column_2}`);
+    window.alert(`Update button clicked. New WIP limits: Backlog=${newconfig.column_0}, Doing=${newconfig.column_1}, Done=${newconfig.column_2}, Workers=${newconfig.workers_1}`);
 });
 
 // NEW: Automatically fetch board state every 2 seconds to keep UI in sync with Backend

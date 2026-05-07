@@ -25,10 +25,10 @@ def serve_static(filename):
 #defined in api_service.py
 @app.route('/board', methods=['GET'])
 def board():
-    #print("\n\n===== FLASK BOARD ENDPOINT CALLED =====\n\n")
+    print("\n\n===== FLASK BOARD ENDPOINT CALLED =====\n\n")
     data = get_board_data()
-    #print(f"DEBUG: get_board_data function exists: {callable(get_board_data)}")
-    #print(f"\n===== RETURNING DATA: {list(data.keys())} =====\n\n")
+    print(f"DEBUG: get_board_data function exists: {callable(get_board_data)}")
+    print(f"\n===== RETURNING DATA: {list(data.keys())} =====\n\n")
     return jsonify(data)
 
 
@@ -47,15 +47,16 @@ def reset():
 
 @app.route('/clock-and-day', methods=['GET'])
 def clock_and_day():
-    #print("\n\n===== FLASK CLOCK_AND_DAY ENDPOINT CALLED =====\n\n")
+    print("\n\n===== FLASK CLOCK_AND_DAY ENDPOINT CALLED =====\n\n")
     data2 = get_clock_and_day()  # Call the revised function
-    #print(f"DEBUG: get_clock_and_day function exists: {callable(get_clock_and_day)}")
-    #print(f"\n===== RETURNING DATA: {list(data2.keys())} =====\n\n")
+    print(f"DEBUG: get_clock_and_day function exists: {callable(get_clock_and_day)}")
+    print(f"\n===== RETURNING DATA: {list(data2.keys())} =====\n\n")
     return jsonify(data2)
 
 @app.route('/update-config', methods=['POST'])
 def update_config():
     try:
+        print("\n\n===== FLASK UPDATE_CONFIG ENDPOINT CALLED =====\n\n")
         new_config = request.get_json()
         if new_config is None:
             return jsonify({"error": "No JSON data provided"}), 400

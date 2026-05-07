@@ -53,7 +53,8 @@ def get_board_data():
                 'name': task.name,
                 'created_at': task.created_at,
                 'done_at': task.done_at,
-                'status': task.status
+                'status': task.status,
+                'worker_task': task.worker_task
             })
         board_state[f"column_{i}"] = tasks_list
     
@@ -96,8 +97,3 @@ def update_config():
     return wip_limit_updated
 
        
-    #for i, col in enumerate(KB.board_1.columns):
-        #col.max_tasks = WIP_limits.get(f"column_{i}", col.wip_limit)
-    # Placeholder for future configuration update logic
-    # You can parse new_config and update KB variables accordingly
-    #return {"status": "Configuration updated (placeholder)"}
