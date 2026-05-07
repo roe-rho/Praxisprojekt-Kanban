@@ -166,7 +166,7 @@ updateBtn.addEventListener('click', async function() {
         window.alert('Error updating configuration. Please try again.');
     }
 
-    callAPI('/stop');
+    /*callAPI('/stop');
     isRunning = false;
 
     callAPI('/reset');
@@ -174,7 +174,7 @@ updateBtn.addEventListener('click', async function() {
     callAPI('/update-config');
 
     startBtn.disabled = false;
-    stopBtn.disabled = true;
+    stopBtn.disabled = true;*/
 
     window.alert(`Update button clicked. New WIP limits: Backlog=${newWIPLimits.column_0}, Doing=${newWIPLimits.column_1}, Done=${newWIPLimits.column_2}`);
 });

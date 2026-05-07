@@ -67,8 +67,9 @@ def get_clock_and_day():
     if KB.board_1 is None:
         return {"clock": None, "day": None}
     
-    clock = KB.clock
-    day = KB.day
+    if KB.running == True:
+        clock = KB.clock
+        day = KB.day
 
     #print(f"DEBUG api_service.py - clock: {clock}, day: {day}")
 

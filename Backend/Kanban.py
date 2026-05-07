@@ -76,20 +76,20 @@ def generate_columns(n):
     global tick_interval
     num_columns = n
 
-    backend_dir = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(backend_dir, 'config.json')
+    #backend_dir = os.path.dirname(os.path.abspath(__file__))
+    #config_path = os.path.join(backend_dir, 'config.json')
 
-    if not os.path.exists(config_path):
-        print(f"Config file not found at {config_path}. Using default configuration.")
-        return
+    #if not os.path.exists(config_path):
+        #print(f"Config file not found at {config_path}. Using default configuration.")
+        #return
     
-    try:
-        with open(config_path, 'r') as f:
-            new_config = json.load(f)
+    #try:
+        #with open(config_path, 'r') as f:
+            #new_config = json.load(f)
         
-        print(f"DEBUG update_column_config - Loaded config: {new_config}")
-    except Exception as e:
-        print(f"Error loading config: {e}. Using default configuration.")
+        #print(f"DEBUG update_column_config - Loaded config: {new_config}")
+    #except Exception as e:
+        #print(f"Error loading config: {e}. Using default configuration.")
 
     #Generate n number of columns (Unused, default = 3)
     board_1 = Board(total_columns=n)
@@ -105,8 +105,8 @@ def generate_columns(n):
             processing_time=10*tick_interval    #Default processing time is 10 ticks (10 seconds if tick_interval is 1 second)
         )
 
-        if config_updated == True:
-            col.max_tasks = int(new_config.get(f"column_{i}", col.max_tasks))  # Update max_tasks if config has been updated
+        #if config_updated == True:
+            #col.max_tasks = int(new_config.get(f"column_{i}", col.max_tasks))  # Update max_tasks if config has been updated
             
 
 
@@ -116,7 +116,25 @@ def generate_columns(n):
 
 
 
+def update_WIP_limit():
+     
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(backend_dir, 'config.json')
 
+    if not os.path.exists(config_path):
+        print(f"Config file not found at {config_path}. Using default configuration.")
+        return
+    
+    try:
+        with open(config_path, 'r') as f:
+            new_config = json.load(f)
+        
+        print(f"DEBUG update_column_config - Loaded config: {new_config}")
+    except Exception as e:
+        print(f"Error loading config: {e}. Using default configuration.")
+    
+    for i in range(num_columns):       
+        board_1.columns[i].max_tasks = int(new_config.get(f"column_{i}"))
         
 
 def generate_task(): #In Backlog (Column 0)
@@ -211,20 +229,20 @@ def main():
     if running == True:
         print("Running...")
     
-    if initial_gen == False:
-        generate_columns(num_columns)
-        initial_gen = True
-        config_updated = False
+    generate_columns(num_columns)
+
     
-    if initial_gen == True and config_updated == True:
-        generate_columns(num_columns)
+    if config_updated == True:
+        update_WIP_limit()
         config_updated = False
 
 
     
 
     while running:
-        
+        if config_updated == True:
+            update_WIP_limit()
+            config_updated = False
         tick_manager()
         generate_task()
         for i in range(num_columns):
@@ -351,8 +369,32 @@ def test_board():
             done_tasks()
             time.sleep(tick_interval)
 
+    #WIP Limit Test
+    if test==6:
+        x = 0
+        num_columns = 3
+        generate_columns(num_columns)
+        while running:
+            if x == 5:
+                update_WIP_limit()
+                for i in range(num_columns):
+                    print(f"Updated config : Column{i} = {board_1.columns[i].max_tasks}")
+                x = 0
+            tick_manager()
+            generate_task()
+            for i in range(num_columns):
+                if i%2 != 0 and i < num_columns - 1:
+                    process_tasks(i)
+            for i in range(num_columns):
+                tasks_display = [f"{task.name} (status: {task.status})" for task in board_1.columns[i].tasks]
+                print(f"\nColumn {i}: {tasks_display}\n")
+            done_tasks()
+            time.sleep(tick_interval)
+            x=x+1
+
+
     #Test all
-    if test == 6 or test == 10:
+    if test == 7 or test == 10:
         num_columns = 3
         generate_columns(num_columns)
         while running:
