@@ -1,4 +1,13 @@
 {
+    // Configure Python environment manager (uses conda)
     "python-envs.defaultEnvManager": "ms-python.python:conda",
-    "python-envs.defaultPackageManager": "ms-python.python:conda"
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    
+    // Tell VS Code where to find Python files for imports
+    // This fixes "Import could not be resolved" errors
+    // Looks in the Backend folder when analyzing imports so that it can find the modules there example kanban and apiserviuce
+    
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/Backend"
+    ]
 }
