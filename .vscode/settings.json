@@ -6,8 +6,9 @@
     // Tell VS Code where to find Python files for imports
     // This fixes "Import could not be resolved" errors
     // Looks in the Backend folder when analyzing imports so that it can find the modules there example kanban and apiserviuce
-    
+
     "python.analysis.extraPaths": [
         "${workspaceFolder}/Backend"
-    ]
+    ],
+
 }
