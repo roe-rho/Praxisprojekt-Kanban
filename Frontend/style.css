@@ -1,26 +1,26 @@
 /* General Styles */
 body {
     font-family: Hubot, Arial, sans-serif;
-    background-color: #c2af87f8;
-    color: #000000;
+    background-color: #08111D;
+    color: #ffffff;
     margin: 0;
     padding: 0;
 }
 
 /* Header */
 header {
-    background-color: #d0c09ef8;
+    background-color: #08111D;
     border-bottom: 1px solid #000000;
     padding: 1rem;
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1.0rem;
     font-weight: bold;
-    color: #000000;
+    color: #F4F6F8;
 }
 
 /* Main Content */
 main {
-    padding: 2rem;
+    padding: 1rem;
 }
 
 #kanban-board {
@@ -31,15 +31,18 @@ main {
 /*control panel*/
 .controls {
     display: flex;
-    justify-content: center;
     gap: 1rem;
     padding: 1rem;
-    background-color: #d0c09ef8;
-}
+    background-color: #101D2B;
+    border: 1px solid #ffffff;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    justify-content: center;
 
+}
 /* Buttons */
 .controls button {
-    background-color: #c2c67e;
+    background-color: #308aad;
     color: #ffffff;
     border: none;
     padding: 0.5rem 1rem;
@@ -49,7 +52,7 @@ main {
 }
 
 .controls button:hover {
-    background-color: #c2c67e;
+    background-color: #1b4c5f;
 }
 .controls button:active{
     transform: scale(0.98);
@@ -58,7 +61,7 @@ main {
 /* Columns */
 .column {
     flex: 1;
-    background-color: #f4f4f4;
+    background-color: #101D2B;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 1rem;
@@ -78,7 +81,8 @@ main {
 
 /* Cards */
 .card {
-    background-color: #ffffff;
+    background-color: #F4F6F8;
+    color: #121826;;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -95,3 +99,31 @@ footer {
     font-size: 0.9rem;
     color: #777;
 }
+
+input[type="number"] {
+    background-color: #08111D;
+    color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.25rem;
+    width: 60px;
+}
+
+.column .user-inputs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+}
+
+
+
+.metrics-display {
+    gap: 2rem;
+    padding: 1rem;
+    background-color: #101D2B;
+    border: #ffffff 1px solid;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+

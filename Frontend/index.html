@@ -3,44 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kanban Simulation</title>
+    <title>Online Kanban Simulation</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>Kanban Simulation</h1>
+        <h1>Online Kanban Simulation</h1>
     </header>
-    <div class = "controls">
-        <button id = "start-btn">Start Simulation</button>
-        <button id = "stop-btn">Stop Simulation</button>
-        <button id = "reset-btn">Reset Simulation</button>
-        <button id = "update-btn">Update Configuration</button>
-        
-
-    </div>
-
-    <div class = "time-and-day">
-        <div id="clock">Time: 0</div>
-        <div id="day">Day: 0</div>
-    </div>
 
     <main>
-        <section id="kanban-board">
+            <section id = "configuration">
+
+                <div class = "controls">
+                        <div class = "user-inputs">
+                            <div>Column Amount:<input id="column-count" type="number" value="3" min="1" style="width: 40px"></div>
+                            <div>Speed: </div>
+                        </div>
+                    <button id = "start-btn">Start</button>
+                    <button id = "stop-btn">Stop</button>
+                    <button id = "reset-btn">Reset</button>
+                    <button id = "update-btn">Update Configuration</button>
+                </div>
+            </section>
+
+            <section id="kanban-board">
             <div class="column" id="col-backlog">
                 <h2>To Do</h2>
+                <div class = "user-inputs">
                 <div>WIP Limit:<input id="column_0" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
+                </div>
                 <div class="cards"></div>
             </div>
             <div class="column" id="col-doing">
                 <h2>Doing</h2>
+                <div class = "user-inputs">
                 <div>WIP Limit:<input id="column_1" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
                 <div>Worker(s): <input id="workers_1" type="number" value="2" min="1" style="width: 40px"></div>
+                </div>
                 <div class="cards"></div>
             </div>
             <div class="column" id="col-testing">
                 <h2>Done</h2>
+                <div class = "user-inputs">
                 <div>WIP Limit:<input id="column_2" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
+                </div>
                 <div class="cards"></div>
+            </div>
+        </section>
+
+        <section id="metrics">
+            <div class = "metrics-display">
+                <h2>Simulation Information</h2>
+                <div id="metrics-content">
+                    <p id="clock">Time: 0</p>
+                    <p id="day">Day: 0</p>
+                    <p id="completed-tasks">Completed Tasks: 0</p>
+                    <p id="in-progress">Work In Progress: 0</p>
+                </div>
             </div>
         </section>
     </main>
