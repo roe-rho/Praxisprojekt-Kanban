@@ -70,7 +70,7 @@ def tick_manager():
         day = day + 1
 
 
-def generate_columns(n):
+def generate_columns():
     global num_columns
     global board_1
     global tick_interval
