@@ -62,8 +62,26 @@ function updateBoardDisplay(data) {
         tasks.forEach(task => {
             const card = document.createElement('div');
             card.className = 'card';
-            // NEW: Display task name and when it was created
-            card.textContent = `Task ${task.id} (${task.created_at}) (${task.status}) (Worker: ${task.worker_task})`;
+
+            const taskInfo = document.createElement('div');
+            taskInfo.className = 'task-info';
+            taskInfo.textContent = `Task ${task.id} (${task.created_at}) (${task.status}) (Worker: ${task.worker_task})`;
+
+            const progressTrack = document.createElement('div');
+            progressTrack.className = 'progress-track';
+
+            const progressFill = document.createElement('div');
+            progressFill.className = 'progress-fill';
+            progressFill.style.width = `${task.progress_percent || 0}%`;
+
+            const progressLabel = document.createElement('span');
+            progressLabel.className = 'progress-label';
+            progressLabel.textContent = `${Math.round(task.progress_percent || 0)}%`;
+
+            progressTrack.appendChild(progressFill);
+            progressTrack.appendChild(progressLabel);
+            card.appendChild(taskInfo);
+            card.appendChild(progressTrack);
             cardsContainer.appendChild(card);
         });
     });

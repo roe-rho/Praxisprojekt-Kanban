@@ -90,6 +90,37 @@ main {
     margin-bottom: 1rem;
 }
 
+.task-info {
+    margin-bottom: 0.75rem;
+}
+
+.progress-track {
+    position: relative;
+    height: 18px;
+    overflow: hidden;
+    border-radius: 4px;
+    background-color: #d9e1e8;
+    border: 1px solid #9aa8b4;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0;
+    background-color: #4b91d8;
+    transition: width 0.2s ease;
+}
+
+.progress-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #121826;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
 /* Footer */
 footer {
     background-color: #ffffff;

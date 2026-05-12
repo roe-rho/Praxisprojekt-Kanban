@@ -48,13 +48,22 @@ def get_board_data():
             # Convert Task objects to dictionaries
         tasks_list = []
         for task in col.tasks:
+            if task.status is not None and col.processing_time > 0:
+                progress_percent = ((col.processing_time - task.status) / col.processing_time) * 100
+                progress_percent = max(0, min(100, round(progress_percent, 2)))
+            elif i == len(KB.board_1.columns) - 1:
+                progress_percent = 100
+            else:
+                progress_percent = 0
+
             tasks_list.append({
                 'id': task.id,
                 'name': task.name,
                 'created_at': task.created_at,
                 'done_at': task.done_at,
                 'status': task.status,
-                'worker_task': task.worker_task
+                'worker_task': task.worker_task,
+                'progress_percent': progress_percent
             })
         board_state[f"column_{i}"] = tasks_list
     

@@ -21,6 +21,7 @@ def test_get_board_data_serializes_columns_and_tasks():
             "done_at": None,
             "status": None,
             "worker_task": 0,
+            "progress_percent": 0,
         }
     ]
     assert data["column_1"] == []
