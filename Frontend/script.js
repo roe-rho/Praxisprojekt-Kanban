@@ -61,17 +61,17 @@ function updateBoardDisplay(data) {
         // NEW: Create new card for each task
         tasks.forEach(task => {
             const card = document.createElement('div');
-            card.className = 'card';
+            card.className = 'card task-card';
 
             const taskInfo = document.createElement('div');
             taskInfo.className = 'task-info';
             taskInfo.textContent = `Task ${task.id} (${task.created_at}) (${task.status}) (Worker: ${task.worker_task})`;
 
             const progressTrack = document.createElement('div');
-            progressTrack.className = 'progress-track';
+            progressTrack.className = 'progress progress-track';
 
             const progressFill = document.createElement('div');
-            progressFill.className = 'progress-fill';
+            progressFill.className = 'progress-bar progress-fill';
             progressFill.style.width = `${task.progress_percent || 0}%`;
 
             const progressLabel = document.createElement('span');
