@@ -106,6 +106,7 @@ function updateBoardDisplay(data) {
     console.log('Board state:', data);
 
     let workInProgress = 0;
+    const metrics = data._metrics || {};
 
     columnDefinitions.forEach(column => {
         const cardsContainer = document.querySelector(`#col-${column.id} .cards`);
@@ -146,6 +147,7 @@ function updateBoardDisplay(data) {
     });
 
     document.getElementById('in-progress').textContent = `Work In Progress: ${workInProgress}`;
+    document.getElementById('completed-tasks').textContent = `Completed Tasks: ${metrics.completed_tasks || 0}`;
 }
 
 async function callAPI(endpoint) {

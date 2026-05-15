@@ -16,7 +16,7 @@ tick_interval = 1  # Initialize tick_interval globally
 #done = column[num_columns - 1]
 
 # Default names used when config.json does not specify custom columns
-DEFAULT_COLUMN_NAMES = ["To Do", "Doing", "Done"]
+DEFAULT_COLUMN_NAMES = ["To Do", "Doing", "Done"] #based on what we did before
 
 ######################################################################################################################################################################################################################################
 #Classes
@@ -29,8 +29,8 @@ class Column:
         self.workers = workers_column #Number of workers assigned to the column (Unused)
         self.total_workers = workers_column #Total number of workers configured for the column
         self.processing_time = processing_time #Time it takes to process a task in the column
-        self.column_type = column_type #queue, process, or done
-        # NOTE: queue and done columns do not process tasks, only process columns do
+        self.column_type = column_type #queue, process, or done (makes it easier to choose the behaviour of the column in the code based on type instead of id, allowing for more flexible column configurations in config.json)
+        # NOTE: queue and done columns do not process tasks, only NOTE process columns do
 
     
     def __repr__(self):
@@ -99,12 +99,12 @@ def load_config():
         return {}
 
 
-def get_column_definitions(config=None, fallback_count=3, use_configured_columns=True):
+def get_column_definitions(config=None, fallback_count=3):
     config = config or load_config()
     configured_columns = config.get("columns")
 
     # If config.json defines a column list, use it directly.
-    if use_configured_columns and isinstance(configured_columns, list) and configured_columns:
+    if isinstance(configured_columns, list) and configured_columns:
         return configured_columns
 
     definitions = []
@@ -137,10 +137,7 @@ def generate_columns(n=None):
     global board_1
     global tick_interval
 
-    column_definitions = get_column_definitions(
-        fallback_count=n or 3,
-        use_configured_columns=n is None
-    )
+    column_definitions = get_column_definitions(fallback_count=n or 3)
     num_columns = len(column_definitions)
 
     #Generate columns from configuration so future columns only need config changes.

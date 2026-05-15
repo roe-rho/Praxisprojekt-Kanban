@@ -34,6 +34,7 @@ def reset_simulation():
                 col.tasks = []
             KB.clock = 9.00
             KB.day = 1
+            KB.completed_tasks_count = 0
     
     return {"status": "Board reset"}
 
@@ -66,6 +67,11 @@ def get_board_data():
                 'progress_percent': progress_percent
             })
         board_state[f"column_{i}"] = tasks_list
+
+    done_visible_count = len(KB.board_1.columns[-1].tasks)
+    board_state["_metrics"] = {
+        "completed_tasks": KB.completed_tasks_count + done_visible_count
+    }
     
     #print(f"DEBUG api_service.py - board_state keys: {list(board_state.keys())}")
     #print(f"DEBUG api_service.py - column_0 type: {type(board_state.get('column_0'))}")

@@ -12,7 +12,7 @@ def test_get_board_data_serializes_columns_and_tasks():
 
     data = api_service.get_board_data()
 
-    assert list(data.keys()) == ["column_0", "column_1", "column_2"]
+    assert list(data.keys()) == ["column_0", "column_1", "column_2", "_metrics"]
     assert data["column_0"] == [
         {
             "id": 1,
@@ -26,6 +26,7 @@ def test_get_board_data_serializes_columns_and_tasks():
     ]
     assert data["column_1"] == []
     assert data["column_2"] == []
+    assert data["_metrics"] == {"completed_tasks": 0}
 
 
 def test_reset_simulation_clears_tasks_and_resets_clock_and_day():

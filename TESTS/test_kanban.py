@@ -128,3 +128,18 @@ def test_even_index_process_column_can_process_tasks(monkeypatch):
     task = KB.board_1.columns[2].tasks[0]
     assert task.status == 8
     assert task.worker_task == 1
+
+
+def test_done_tasks_keeps_only_five_visible_tasks_and_counts_completed():
+    KB.generate_columns(3)
+    done_column = KB.board_1.columns[-1]
+    done_column.tasks = [
+        KB.Task(id=i, name=f"Task {i}", created_at="Day: 1, Time: 9.0")
+        for i in range(1, 7)
+    ]
+
+    KB.done_tasks()
+
+    assert len(done_column.tasks) == 5
+    assert [task.id for task in done_column.tasks] == [2, 3, 4, 5, 6]
+    assert KB.completed_tasks_count == 1

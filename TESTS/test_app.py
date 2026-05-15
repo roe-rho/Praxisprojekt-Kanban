@@ -13,6 +13,7 @@ def test_board_route_returns_current_board_state_as_json():
         "column_0": [],
         "column_1": [],
         "column_2": [],
+        "_metrics": {"completed_tasks": 0},
     }
 
 
