@@ -1,50 +1,46 @@
 {
-  "column_0": "9",
-  "column_1": "4",
-  "column_2": "5",
   "columns": [
     {
       "name": "To Do",
-      "processing_time": "0",
+      "processing_time": 0,
       "type": "queue",
       "wip_limit": "9",
-      "workers": "0"
+      "workers": 0
     },
     {
       "name": "Analysis",
-      "processing_time": "8",
+      "processing_time": 8,
       "type": "process",
-      "wip_limit": "4",
-      "workers": "2"
+      "wip_limit": "1",
+      "workers": "1"
     },
     {
       "name": "Development",
-      "processing_time": "10",
+      "processing_time": 10,
       "type": "process",
-      "wip_limit": "5",
+      "wip_limit": "2",
       "workers": "2"
     },
     {
       "name": "Review",
-      "processing_time": "6",
+      "processing_time": 6,
       "type": "process",
       "wip_limit": "4",
       "workers": "1"
     },
     {
       "name": "Testing",
-      "processing_time": "8",
+      "processing_time": 8,
       "type": "process",
       "wip_limit": "4",
       "workers": "1"
     },
     {
       "name": "Done",
-      "processing_time": "0",
+      "processing_time": 0,
       "type": "done",
-      "wip_limit": "99",
-      "workers": "0"
+      "wip_limit": 99,
+      "workers": 0
     }
-  ],
-  "workers_1": "2"
+  ]
 }

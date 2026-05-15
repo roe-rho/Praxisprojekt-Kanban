@@ -24,6 +24,7 @@ def reset_kanban_state():
     KB.id = 0
     KB.clock = 9.00
     KB.day = 1
+    KB.completed_tasks_count = 0
     KB.num_columns = 3
     KB.board_1 = None
     api_service.simulation_thread = None

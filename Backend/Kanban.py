@@ -4,6 +4,7 @@ import random
 import datetime
 import json
 import os
+from kanban_models import Board, Column, Task
 
 # NEW: Thread lock for safe access to shared board data
 lock = threading.Lock()
@@ -12,49 +13,13 @@ running = False
 config_updated = False
 initial_gen = False
 tick_interval = 1  # Initialize tick_interval globally
+completed_tasks_count = 0
+done_visible_limit = 5
 #backlog = column[0]
 #done = column[num_columns - 1]
 
 # Default names used when config.json does not specify custom columns
 DEFAULT_COLUMN_NAMES = ["To Do", "Doing", "Done"] #based on what we did before
-
-######################################################################################################################################################################################################################################
-#Classes
-class Column:
-    def __init__(self, id, name, max_tasks, workers_column, processing_time, column_type="process"):
-        self.id = id #Column ID
-        self.name = name #Column name
-        self.tasks = [] #List of tasks currently in the column
-        self.max_tasks = max_tasks #Maximum number of tasks that can be in the column at once (WIP limit)
-        self.workers = workers_column #Number of workers assigned to the column (Unused)
-        self.total_workers = workers_column #Total number of workers configured for the column
-        self.processing_time = processing_time #Time it takes to process a task in the column
-        self.column_type = column_type #queue, process, or done (makes it easier to choose the behaviour of the column in the code based on type instead of id, allowing for more flexible column configurations in config.json)
-        # NOTE: queue and done columns do not process tasks, only NOTE process columns do
-
-    
-    def __repr__(self):
-        return f"Column(id={self.id}, name='{self.name}', type='{self.column_type}', tasks={len(self.tasks)}/{self.max_tasks}, workers={self.workers}), processing_time={self.processing_time})"
-
-class Task:
-    def __init__(self, id, name, created_at, done_at=None, worker_task=None, status=None, processing_duration=None):
-        self.id = id #Task ID
-        self.name = name #Task name
-        self.created_at = created_at #Time the task was created
-        self.done_at = done_at #Time the task was completed
-        self.worker_task = worker_task #Worker assigned to the task
-        self.status = status #Current status of the task
-        self.processing_duration = processing_duration #start from when the task starts processing until it reaches the end column.
-    
-    def __repr__(self):
-        return f"Task(id={self.id}, name='{self.name}', created_at='{self.created_at}', done_at='{self.done_at}', worker_task='{self.worker_task}', status='{self.status}', processing_duration='{self.processing_duration}')"
-
-class Board:
-    def __init__(self, total_columns):
-        self.columns = []   #List of columns in the board
-        self.total_columns = total_columns  #Total number of columns in the board
-
-########################################################################################################################################################################################################################################
 
 def tick_manager():
     global tick
@@ -99,12 +64,12 @@ def load_config():
         return {}
 
 
-def get_column_definitions(config=None, fallback_count=3):
+def get_column_definitions(config=None, fallback_count=3, use_configured_columns=True):
     config = config or load_config()
     configured_columns = config.get("columns")
 
     # If config.json defines a column list, use it directly.
-    if isinstance(configured_columns, list) and configured_columns:
+    if use_configured_columns and isinstance(configured_columns, list) and configured_columns:
         return configured_columns
 
     definitions = []
@@ -137,7 +102,10 @@ def generate_columns(n=None):
     global board_1
     global tick_interval
 
-    column_definitions = get_column_definitions(fallback_count=n or 3)
+    column_definitions = get_column_definitions(
+        fallback_count=n or 3,
+        use_configured_columns=n is None
+    )
     num_columns = len(column_definitions)
 
     #Generate columns from configuration so future columns only need config changes.
@@ -278,12 +246,14 @@ def process_tasks(col): # For columns 1 to n-2, process tasks and move them to t
             
 
 def done_tasks():
-    #If the last column has tasks and the first task in the last column is done, remove it from the board and set its done_at time
-    if num_columns%2 != 0:
-        if len(board_1.columns[num_columns - 1].tasks) >= board_1.columns[num_columns - 1].max_tasks + 1:
-             
-            task = board_1.columns[num_columns - 1].tasks.pop(0)
-            task.done_at = f"Day: {day}, Time: {round(clock, 3)}"
+    global completed_tasks_count
+
+    done_column = board_1.columns[num_columns - 1]
+
+    while len(done_column.tasks) > done_visible_limit:
+        task = done_column.tasks.pop(0)
+        task.done_at = f"Day: {day}, Time: {round(clock, 3)}"
+        completed_tasks_count += 1
 
             
 
@@ -304,12 +274,14 @@ def main():
     global day
     global config_updated
     global initial_gen
+    global completed_tasks_count
     #running = True
     tick_interval = 1  # 1 second per tick default
     tick = 0
     id = 0
     clock = 9.00
     day = 1
+    completed_tasks_count = 0
     initial_gen = False
 
     if running == True:
