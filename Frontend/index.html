@@ -4,65 +4,163 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Kanban Simulation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
-    <header>
-        <h1>Online Kanban Simulation</h1>
-    </header>
+    <div class="app-shell">
+        <header class="container py-4 py-lg-5">
+            <section class="hero-panel text-center mx-auto">
+                <span class="badge rounded-pill text-bg-light hero-badge">Kanban Dashboard</span>
+                <h1 class="display-5 fw-bold mt-3 mb-2">Online Kanban Simulation</h1>
+                <p class="lead mb-0">Visualize flow, capacity, work in progress, and task progress in one simple simulation view.</p>
+                <p class="lead mb-0">By Danial and Ronan.</p>
+            </section>
+        </header>
 
-    <main>
-            <section id = "configuration">
-
-                <div class = "controls">
-                        <div class = "user-inputs">
-                            <div>Column Amount:<input id="column-count" type="number" value="3" min="1" style="width: 40px"></div>
-                            <div>Speed: </div>
+        <main class="container pb-5">
+            <section id="configuration" class="control-card card border-0 mb-4">
+                <div class="card-body p-4">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-6 col-xl-2">
+                            <label for="column-count" class="form-label">Column Amount</label>
+                            <input id="column-count" class="form-control form-control-lg" type="number" value="3" min="1">
                         </div>
-                    <button id = "start-btn">Start</button>
-                    <button id = "stop-btn">Stop</button>
-                    <button id = "reset-btn">Reset</button>
-                    <button id = "update-btn">Update Configuration</button>
+
+                        <div class="col-12 col-md-6 col-xl-2">
+                            <label class="form-label">Speed</label>
+                            <div class="speed-display form-control form-control-lg">Default</div>
+                        </div>
+
+                        <div class="col-12 col-xl-8">
+                            <div class="d-flex flex-column flex-sm-row justify-content-xl-end gap-2 gap-lg-3">
+                                <button id="start-btn" class="btn btn-lg btn-success ronanui-btn">Start</button>
+                                <button id="stop-btn" class="btn btn-lg btn-danger ronanui-btn">Pause</button>
+                                <button id="reset-btn" class="btn btn-lg btn-secondary ronanui-btn" title ="Hold 3 seconds to reset simulation">Reset</button>
+                                <button id="update-btn" class="btn btn-lg btn-primary ronanui-btn">Update Configuration</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <section id="kanban-board">
-            <div class="column" id="col-backlog">
-                <h2>To Do</h2>
-                <div class = "user-inputs">
-                <div>WIP Limit:<input id="column_0" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
-                </div>
-                <div class="cards"></div>
-            </div>
-            <div class="column" id="col-doing">
-                <h2>Doing</h2>
-                <div class = "user-inputs">
-                <div>WIP Limit:<input id="column_1" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
-                <div>Worker(s): <input id="workers_1" type="number" value="2" min="1" style="width: 40px"></div>
-                </div>
-                <div class="cards"></div>
-            </div>
-            <div class="column" id="col-testing">
-                <h2>Done</h2>
-                <div class = "user-inputs">
-                <div>WIP Limit:<input id="column_2" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
-                </div>
-                <div class="cards"></div>
-            </div>
-        </section>
+            <section id="kanban-board" class="row g-4 flex-lg-nowrap overflow-auto pb-2">
+                <div class="col-12 col-lg-4 kanban-column-wrap">
+                    <article class="column kanban-column card border-0 h-100" id="col-backlog">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                                <div>
+                                    <span class="column-kicker">Queue</span>
+                                    <h2 class="h4 fw-bold mb-0">Backlog</h2>
+                                </div>
+                                <span class="badge rounded-pill text-bg-info">Input</span>
+                            </div>
 
-        <section id="metrics">
-            <div class = "metrics-display">
-                <h2>Simulation Information</h2>
-                <div id="metrics-content">
-                    <p id="clock">Time: 0</p>
-                    <p id="day">Day: 0</p>
-                    <p id="completed-tasks">Completed Tasks: 0</p>
-                    <p id="in-progress">Work In Progress: 0</p>
+                            <div class="user-inputs column-settings">
+                                <label for="column_0" class="form-label mb-1">WIP Limit</label>
+                                <input id="column_0" class="form-control form-control-sm" type="number" value="5" min="1">
+                                <div class="count"></div>
+                            </div>
+
+                            <div class="cards task-list"></div>
+                        </div>
+                    </article>
                 </div>
-            </div>
-        </section>
-    </main>
+
+                <div class="col-12 col-lg-4 kanban-column-wrap">
+                    <article class="column kanban-column card border-0 h-100" id="col-doing">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                                <div>
+                                    <span class="column-kicker">Active</span>
+                                    <h2 class="h4 fw-bold mb-0">Doing</h2>
+                                </div>
+                                <span class="badge rounded-pill text-bg-primary">Work</span>
+                            </div>
+
+                            <div class="user-inputs column-settings two-fields">
+                                <div>
+                                    <label for="column_1" class="form-label mb-1">WIP Limit</label>
+                                    <input id="column_1" class="form-control form-control-sm" type="number" value="5" min="1">
+                                    <div class="count"></div>
+                                </div>
+                                <div>
+                                    <label for="workers_1" class="form-label mb-1">Worker(s)</label>
+                                    <input id="workers_1" class="form-control form-control-sm" type="number" value="2" min="1">
+                                </div>
+                            </div>
+
+                            <div class="cards task-list"></div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="col-12 col-lg-4 kanban-column-wrap">
+                    <article class="column kanban-column card border-0 h-100" id="col-testing">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                                <div>
+                                    <span class="column-kicker">Output</span>
+                                    <h2 class="h4 fw-bold mb-0">Done</h2>
+                                </div>
+                                <span class="badge rounded-pill text-bg-success">Complete</span>
+                            </div>
+
+                            <div class="user-inputs column-settings">
+                                <label for="column_2" class="form-label mb-1">WIP Limit</label>
+                                <input id="column_2" class="form-control form-control-sm" type="number" value="5" min="1">
+                                <div class="count"></div>
+                            </div>
+
+                            <div class="cards task-list"></div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="metrics" class="metrics-panel card border-0 mt-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-4">
+                        <div>
+                            <span class="column-kicker">Live Metrics</span>
+                            <h2 class="h3 fw-bold mb-0">Simulation Information</h2>
+                        </div>
+                        <span class="badge rounded-pill metric-status align-self-md-start">Real-time</span>
+                    </div>
+
+                    <div id="metrics-content" class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="stat-card">
+                                <span class="stat-label">Clock</span>
+                                <p id="clock" class="stat-value">Time: 0</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="stat-card">
+                                <span class="stat-label">Day</span>
+                                <p id="day" class="stat-value">Day: 0</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="stat-card">
+                                <span class="stat-label">Completed</span>
+                                <p id="completed-tasks" class="stat-value">Completed Tasks: 0</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="stat-card">
+                                <span class="stat-label">Workload</span>
+                                <p id="in-progress" class="stat-value">Work In Progress: 0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
