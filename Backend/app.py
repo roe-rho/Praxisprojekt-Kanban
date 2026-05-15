@@ -83,8 +83,7 @@ def update_config():
 
 
 if __name__ == '__main__':
-   KB.num_columns = 3  # Set number of columns before starting
-   KB.generate_columns(KB.num_columns)
+   KB.generate_columns()
 
    webbrowser.open('http://127.0.0.1:5000/')
    app.run(debug = False, use_reloader = False, host='127.0.0.1', port=5000)  # Ensure use_reloader is False to avoid double-starting threads

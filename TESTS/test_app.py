@@ -53,6 +53,14 @@ def test_update_config_route_writes_json_and_marks_config_updated():
         "column_1": "4",
         "column_2": "5",
         "workers_1": "2",
+        "columns": [
+            {"name": "To Do", "type": "queue", "wip_limit": "9", "workers": "0", "processing_time": "0"},
+            {"name": "Analysis", "type": "process", "wip_limit": "4", "workers": "2", "processing_time": "8"},
+            {"name": "Development", "type": "process", "wip_limit": "5", "workers": "2", "processing_time": "10"},
+            {"name": "Review", "type": "process", "wip_limit": "4", "workers": "1", "processing_time": "6"},
+            {"name": "Testing", "type": "process", "wip_limit": "4", "workers": "1", "processing_time": "8"},
+            {"name": "Done", "type": "done", "wip_limit": "99", "workers": "0", "processing_time": "0"},
+        ],
     }
 
     response = client.post("/update-config", json=new_config)

@@ -1,37 +1,100 @@
-// Get references to the three buttons
 const startBtn = document.getElementById('start-btn');
 const stopBtn = document.getElementById('stop-btn');
 const resetBtn = document.getElementById('reset-btn');
 const updateBtn = document.getElementById('update-btn');
+const columnCountInput = document.getElementById('column-count');
+const boardContainer = document.getElementById('kanban-board');
 
-// NEW: URL where Backend Flask server is running (must match app.run() host:port)
 const API_URL = 'http://localhost:5000';
+const HOLD_DURATION = 3000;
+
 let isRunning = false;
 let holdTimer = null;
-// NEW: Changed to 3 seconds for reset hold (user must hold button 3 seconds to reset)
-const HOLD_DURATION = 3000; // 3 seconds for reset hold
 
-// NEW: Fetch the current board state from the Backend API
+const columnDefinitions = [
+    { id: 0, name: 'To Do', type: 'queue', badge: 'Input', badgeClass: 'text-bg-info', wipLimit: 9, workers: 0, processingTime: 0 },
+    { id: 1, name: 'Analysis', type: 'process', badge: 'Plan', badgeClass: 'text-bg-primary', wipLimit: 4, workers: 2, processingTime: 8 },
+    { id: 2, name: 'Development', type: 'process', badge: 'Build', badgeClass: 'text-bg-primary', wipLimit: 5, workers: 2, processingTime: 10 },
+    { id: 3, name: 'Review', type: 'process', badge: 'Check', badgeClass: 'text-bg-primary', wipLimit: 4, workers: 1, processingTime: 6 },
+    { id: 4, name: 'Testing', type: 'process', badge: 'Verify', badgeClass: 'text-bg-primary', wipLimit: 4, workers: 1, processingTime: 8 },
+    { id: 5, name: 'Done', type: 'done', badge: 'Complete', badgeClass: 'text-bg-success', wipLimit: 99, workers: 0, processingTime: 0 }
+];
+
+function getColumnKicker(column) {
+    if (column.type === 'queue') {
+        return 'Queue';
+    }
+    if (column.type === 'done') {
+        return 'Output';
+    }
+    return 'Active';
+}
+
+function renderColumns() {
+    boardContainer.innerHTML = '';
+    columnCountInput.value = columnDefinitions.length;
+
+    columnDefinitions.forEach(column => {
+        const columnWrap = document.createElement('div');
+        columnWrap.className = 'kanban-column-wrap';
+
+        const workerInput = column.type === 'process'
+            ? `
+                <div>
+                    <label for="workers_${column.id}" class="form-label mb-1">Worker(s)</label>
+                    <input id="workers_${column.id}" class="form-control form-control-sm" type="number" value="${column.workers}" min="1">
+                </div>
+            `
+            : '';
+        const settingsPanel = column.type === 'done'
+            ? ''
+            : `
+                <div class="user-inputs column-settings ${column.type === 'process' ? 'two-fields' : ''}">
+                    <div>
+                        <label for="column_${column.id}" class="form-label mb-1">WIP Limit</label>
+                        <input id="column_${column.id}" class="form-control form-control-sm" type="number" value="${column.wipLimit}" min="1">
+                        <div class="count"></div>
+                    </div>
+                    ${workerInput}
+                </div>
+            `;
+
+        columnWrap.innerHTML = `
+            <article class="column kanban-column card border-0 h-100" id="col-${column.id}">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                        <div>
+                            <span class="column-kicker">${getColumnKicker(column)}</span>
+                            <h2 class="h4 fw-bold mb-0">${column.name}</h2>
+                        </div>
+                        <span class="badge rounded-pill ${column.badgeClass}">${column.badge}</span>
+                    </div>
+
+                    ${settingsPanel}
+
+                    <div class="cards task-list"></div>
+                </div>
+            </article>
+        `;
+
+        boardContainer.appendChild(columnWrap);
+    });
+}
+
 async function fetchBoardState() {
     try {
-        // NEW: Make GET request to /board endpoint
         const response = await fetch(`${API_URL}/board`);
-        // NEW: Convert response to JSON
         const data = await response.json();
-        // NEW: Update the display with the fetched data
         updateBoardDisplay(data);
     } catch (error) {
-        // NEW: Log any errors (e.g., if server is not running)
         console.error('Error fetching board:', error);
     }
 }
 
 async function fetchClockAndDay() {
     try {
-        // NEW: Make GET request to /clock-and-day endpoint to get clock and day
         const response = await fetch(`${API_URL}/clock-and-day`);
         const data2 = await response.json();
-        // NEW: Update the display with the fetched clock and day (formatted to 2 decimal places)
         document.getElementById('clock').textContent = `Clock: ${parseFloat(data2.clock).toFixed(2)}`;
         document.getElementById('day').textContent = `Day: ${data2.day}`;
     } catch (error) {
@@ -39,26 +102,22 @@ async function fetchClockAndDay() {
     }
 }
 
-// NEW: Update the HTML board with task data from the API
 function updateBoardDisplay(data) {
     console.log('Board state:', data);
-    
-    // NEW: List of HTML column IDs in order (matches Backend column_0, column_1, column_2)
-    const columns = ['col-backlog', 'col-doing', 'col-testing'];
-    
-    // NEW: Loop through each column and update it with tasks
-    columns.forEach((colId, index) => {
-        // NEW: Find the cards container for this column
-        const cardsContainer = document.querySelector(`#${colId} .cards`);
-        // NEW: Get the corresponding data from Backend (e.g., column_0, column_1)
-        const columnKey = `column_${index}`;
-        // NEW: Get tasks for this column (empty array if none exist)
+
+    let workInProgress = 0;
+
+    columnDefinitions.forEach(column => {
+        const cardsContainer = document.querySelector(`#col-${column.id} .cards`);
+        const columnKey = `column_${column.id}`;
         const tasks = data[columnKey] || [];
-        
-        // NEW: Remove all old task cards from this column
+
+        if (column.type !== 'done') {
+            workInProgress += tasks.length;
+        }
+
         cardsContainer.innerHTML = '';
-        
-        // NEW: Create new card for each task
+
         tasks.forEach(task => {
             const card = document.createElement('div');
             card.className = 'card task-card';
@@ -85,86 +144,90 @@ function updateBoardDisplay(data) {
             cardsContainer.appendChild(card);
         });
     });
+
+    document.getElementById('in-progress').textContent = `Work In Progress: ${workInProgress}`;
 }
 
-// NEW: Send commands to the Backend API
 async function callAPI(endpoint) {
     try {
-        // NEW: Make POST request to Backend endpoint (e.g., /start, /stop, /reset)
         const response = await fetch(`${API_URL}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
-        // NEW: Get response and log it
         const data = await response.json();
         console.log(`${endpoint} response:`, data);
     } catch (error) {
-        // NEW: Log errors if request fails
         console.error(`Error calling ${endpoint}:`, error);
     }
 }
 
-// NEW: Start button click - call Backend to start simulation
+function buildConfigPayload() {
+    return {
+        columns: columnDefinitions.map(column => {
+            const wipInput = document.getElementById(`column_${column.id}`);
+            const workerInput = document.getElementById(`workers_${column.id}`);
+
+            return {
+                name: column.name,
+                type: column.type,
+                wip_limit: wipInput ? wipInput.value : column.wipLimit,
+                workers: workerInput ? workerInput.value : 0,
+                processing_time: column.processingTime
+            };
+        })
+    };
+}
+
+function hasInvalidConfig(config) {
+    return config.columns.some(column => {
+        const wipLimit = Number(column.wip_limit);
+        const workers = Number(column.workers);
+        return wipLimit < 1 || (column.type === 'process' && workers < 1);
+    });
+}
+
 startBtn.addEventListener('click', function() {
-    // NEW: Tell Backend to start the simulation
     callAPI('/start');
     isRunning = true;
     console.log('Kanban simulation started');
     window.alert('Start button clicked.');
-    // NEW: Disable Start button, enable Stop button
     startBtn.disabled = true;
     stopBtn.disabled = false;
 });
 
-// NEW: Stop button click - call Backend to stop simulation
 stopBtn.addEventListener('click', function() {
-    // NEW: Tell Backend to stop the simulation
     callAPI('/stop');
     isRunning = false;
     console.log('Kanban simulation stopped');
-    //window.alert('Stop button clicked.');
-    // NEW: Enable Start button, disable Stop button
     startBtn.disabled = false;
     stopBtn.disabled = true;
 });
 
-// NEW: Reset button - user must hold for 3 seconds (security feature)
 resetBtn.addEventListener('mousedown', function() {
-    // NEW: Start counting down - if user holds 3 seconds, reset
     holdTimer = setTimeout(function() {
-        // NEW: Tell Backend to reset (clear all tasks)
         callAPI('/reset');
         isRunning = false;
         console.log('Kanban simulation reset');
-        // NEW: Reset buttons to initial state
         startBtn.disabled = false;
         stopBtn.disabled = true;
     }, HOLD_DURATION);
 });
 
-// NEW: If user releases button before 3 seconds, cancel the reset
 resetBtn.addEventListener('mouseup', function() {
     clearTimeout(holdTimer);
 });
 
-// NEW: If user moves mouse away from button before 3 seconds, cancel the reset
 resetBtn.addEventListener('mouseleave', function() {
     clearTimeout(holdTimer);
 });
 
 updateBtn.addEventListener('click', async function() {
-    // NEW: Placeholder for future configuration update logic
-    const newconfig = {
-        column_0: document.getElementById('column_0').value,
-        column_1: document.getElementById('column_1').value,
-        column_2: document.getElementById('column_2').value,
-        workers_1: document.getElementById('workers_1').value
-    };
+    const newconfig = buildConfigPayload();
 
-    if (newconfig.column_0 < 1 || newconfig.column_1 < 1 || newconfig.column_2 < 1 || newconfig.workers_1 < 1) {
+    if (hasInvalidConfig(newconfig)) {
         window.alert('WIP limits and worker counts must be at least 1.');
         return;
-    }   
+    }
 
     try {
         const response = await fetch(`${API_URL}/update-config`, {
@@ -174,26 +237,15 @@ updateBtn.addEventListener('click', async function() {
         });
 
         const data = await response.json();
-
-        if (data.success){
-            console.log('Configuration updated successfully:', data);
-            window.alert('Configuration updated successfully.');
-        }
-
+        console.log('Configuration update response:', data);
+        window.alert('Configuration updated successfully.');
     } catch (error) {
         console.error('Error updating configuration:', error);
         window.alert('Error updating configuration. Please try again.');
     }
-
-
-    window.alert(`Update button clicked. New WIP limits: Backlog=${newconfig.column_0}, Doing=${newconfig.column_1}, Done=${newconfig.column_2}, Workers=${newconfig.workers_1}`);
 });
 
-// NEW: Automatically fetch board state every 2 seconds to keep UI in sync with Backend
+renderColumns();
 setInterval(fetchBoardState, 100);
-
-// NEW: Automatically fetch clock and day every 1 second
 setInterval(fetchClockAndDay, 100);
-
-// NEW: Start with Stop button disabled (simulation must start first)
 stopBtn.disabled = true;

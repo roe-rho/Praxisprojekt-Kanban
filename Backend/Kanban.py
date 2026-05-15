@@ -15,19 +15,26 @@ tick_interval = 1  # Initialize tick_interval globally
 #backlog = column[0]
 #done = column[num_columns - 1]
 
+# Default names used when config.json does not specify custom columns
+DEFAULT_COLUMN_NAMES = ["To Do", "Doing", "Done"]
+
 ######################################################################################################################################################################################################################################
 #Classes
 class Column:
-    def __init__(self, id, name, max_tasks, workers_column, processing_time):
+    def __init__(self, id, name, max_tasks, workers_column, processing_time, column_type="process"):
         self.id = id #Column ID
         self.name = name #Column name
         self.tasks = [] #List of tasks currently in the column
         self.max_tasks = max_tasks #Maximum number of tasks that can be in the column at once (WIP limit)
         self.workers = workers_column #Number of workers assigned to the column (Unused)
+        self.total_workers = workers_column #Total number of workers configured for the column
         self.processing_time = processing_time #Time it takes to process a task in the column
+        self.column_type = column_type #queue, process, or done
+        # NOTE: queue and done columns do not process tasks, only process columns do
+
     
     def __repr__(self):
-        return f"Column(id={self.id}, name='{self.name}', tasks={len(self.tasks)}/{self.max_tasks}, workers={self.workers}), processing_time={self.processing_time})"
+        return f"Column(id={self.id}, name='{self.name}', type='{self.column_type}', tasks={len(self.tasks)}/{self.max_tasks}, workers={self.workers}), processing_time={self.processing_time})"
 
 class Task:
     def __init__(self, id, name, created_at, done_at=None, worker_task=None, status=None, processing_duration=None):
@@ -70,31 +77,93 @@ def tick_manager():
         day = day + 1
 
 
-def generate_columns(n):
+# Config helpers for loading backend settings from config.json
+# This allows column count, names, WIP limits, workers, and processing time to be changed without code edits.
+def get_config_path():
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(backend_dir, 'config.json')
+
+
+def load_config():
+    config_path = get_config_path()
+
+    if not os.path.exists(config_path):
+        print(f"Config file not found at {config_path}. Using default configuration.")
+        return {}
+
+    try:
+        with open(config_path, 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading config: {e}. Using default configuration.")
+        return {}
+
+
+def get_column_definitions(config=None, fallback_count=3, use_configured_columns=True):
+    config = config or load_config()
+    configured_columns = config.get("columns")
+
+    # If config.json defines a column list, use it directly.
+    if use_configured_columns and isinstance(configured_columns, list) and configured_columns:
+        return configured_columns
+
+    definitions = []
+    for i in range(fallback_count):
+        if i == 0:
+            column_type = "queue"
+        elif i == fallback_count - 1:
+            column_type = "done"
+        else:
+            column_type = "process"
+
+        default_name = DEFAULT_COLUMN_NAMES[i] if i < len(DEFAULT_COLUMN_NAMES) else f"Column {i}"
+        definitions.append({
+            "name": default_name,
+            "wip_limit": int(config.get(f"column_{i}", 5)),
+            "workers": int(config.get(f"workers_{i}", 2 if column_type == "process" else 0)),
+            "processing_time": int(config.get(f"processing_time_{i}", 10 * tick_interval if column_type == "process" else 0)),
+            "type": column_type
+        })
+
+    return definitions
+
+
+def should_process_column(col):
+    return col.column_type == "process"
+
+
+def generate_columns(n=None):
     global num_columns
     global board_1
     global tick_interval
-    num_columns = n
 
-    
+    column_definitions = get_column_definitions(
+        fallback_count=n or 3,
+        use_configured_columns=n is None
+    )
+    num_columns = len(column_definitions)
 
-    #Generate n number of columns (Unused, default = 3)
-    board_1 = Board(total_columns=n)
+    #Generate columns from configuration so future columns only need config changes.
+    board_1 = Board(total_columns=num_columns)
     
     #Assign column attributes (i = number ie. Column 0, 1, 2, etc)
-    for i in range(n):
+    for i, column_definition in enumerate(column_definitions):
+        column_type = column_definition.get("type", "process")
+        workers = int(column_definition.get("workers", 2 if column_type == "process" else 0))
+        processing_time = int(column_definition.get("processing_time", 10 * tick_interval if column_type == "process" else 0))
+
+        if column_type in ("queue", "done"):
+            workers = 0
+            processing_time = 0
         
         col = Column(
             id=i,
-            name=f"Column {i}",
-            max_tasks=5,  # Get WIP limit from config.json
-            workers_column=2,   #Unused, default = 2 workers per column
-            processing_time=10*tick_interval    #Default processing time is 10 ticks (10 seconds if tick_interval is 1 second)
+            name=column_definition.get("name", f"Column {i}"),
+            max_tasks=int(column_definition.get("wip_limit", 5)),
+            workers_column=workers,
+            processing_time=processing_time,
+            column_type=column_type
         )
-
-        if col.id == 0 or col.id == n-1:
-            col.processing_time = 0  # Set processing time to 0 for the first and last columns
-            col.workers = 0  # Set workers to 0 for the first and last columns since they don't process tasks
         
         board_1.columns.append(col)
     
@@ -102,30 +171,45 @@ def generate_columns(n):
 
 
 def update_config():
-     
-    backend_dir = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(backend_dir, 'config.json')
+    new_config = load_config()
+    print(f"DEBUG update_column_config - Loaded config: {new_config}")
 
-    if not os.path.exists(config_path):
-        print(f"Config file not found at {config_path}. Using default configuration.")
+    configured_columns = new_config.get("columns")
+
+    # If config.json provides a columns list, update each existing column entry.
+    if isinstance(configured_columns, list) and configured_columns:
+        for i, column_definition in enumerate(configured_columns[:num_columns]):
+            col = board_1.columns[i]
+            col.name = column_definition.get("name", col.name)
+            col.column_type = column_definition.get("type", col.column_type)
+            col.max_tasks = int(column_definition.get("wip_limit", col.max_tasks))
+
+            if should_process_column(col):
+                for j in range(len(col.tasks)-1, -1, -1):
+                    task = col.tasks[j]
+                    if task.worker_task > 0:
+                        task.worker_task = 0
+
+                col.workers = int(column_definition.get("workers", col.workers))
+                col.total_workers = col.workers
+                col.processing_time = int(column_definition.get("processing_time", col.processing_time))
+            else:
+                # Non-processing columns should not have active workers or processing time.
+                col.workers = 0
+                col.total_workers = 0
+                col.processing_time = 0
         return
-    
-    try:
-        with open(config_path, 'r') as f:
-            new_config = json.load(f)
-        
-        print(f"DEBUG update_column_config - Loaded config: {new_config}")
-    except Exception as e:
-        print(f"Error loading config: {e}. Using default configuration.")
-    
-    for i in range(num_columns):       
-        board_1.columns[i].max_tasks = int(new_config.get(f"column_{i}"))
-        if i != 0 and i != num_columns - 1:
+
+    for i in range(num_columns):
+        col = board_1.columns[i]
+        col.max_tasks = int(new_config.get(f"column_{i}", col.max_tasks))
+        if should_process_column(col):
             for j in range(len(board_1.columns[i].tasks)-1, -1, -1):
                 task = board_1.columns[i].tasks[j]
                 if task.worker_task > 0:
                     task.worker_task = 0
-            board_1.columns[i].workers = int(new_config.get(f"workers_{i}", board_1.columns[i].workers))  # Update workers if specified in config, otherwise keep current value
+            col.workers = int(new_config.get(f"workers_{i}", col.workers))  # Update workers if specified in config, otherwise keep current value
+            col.total_workers = col.workers
         
 
 def generate_task(): #In Backlog (Column 0)
@@ -231,13 +315,11 @@ def main():
     day = 1
     initial_gen = False
 
-    num_columns = 3
-
-    
     if running == True:
         print("Running...")
     
-    generate_columns(num_columns)
+    # Generate columns based on config.json defaults or fallback values.
+    generate_columns()
 
     
     if config_updated == True:
@@ -254,7 +336,8 @@ def main():
         tick_manager()
         generate_task()
         for i in range(num_columns):
-            if i%2 != 0 and i < num_columns - 1:
+            # Only process columns that are of type "process".
+            if should_process_column(board_1.columns[i]):
                 process_tasks(i)
         done_tasks()
         if running == False:

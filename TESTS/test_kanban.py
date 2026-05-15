@@ -86,3 +86,45 @@ def test_update_config_loads_wip_limits_and_worker_count():
     assert KB.board_1.columns[1].max_tasks == 4
     assert KB.board_1.columns[1].workers == 2
     assert KB.board_1.columns[2].max_tasks == 5
+
+
+def test_generate_columns_can_use_configured_column_definitions(monkeypatch):
+    monkeypatch.setattr(KB, "load_config", lambda: {
+        "columns": [
+            {"name": "To Do", "type": "queue", "wip_limit": 7, "workers": 0, "processing_time": 0},
+            {"name": "Analysis", "type": "process", "wip_limit": 3, "workers": 1, "processing_time": 6},
+            {"name": "Development", "type": "process", "wip_limit": 4, "workers": 2, "processing_time": 8},
+            {"name": "Done", "type": "done", "wip_limit": 99, "workers": 0, "processing_time": 0},
+        ]
+    })
+
+    KB.generate_columns()
+
+    assert KB.num_columns == 4
+    assert [col.name for col in KB.board_1.columns] == ["To Do", "Analysis", "Development", "Done"]
+    assert [col.column_type for col in KB.board_1.columns] == ["queue", "process", "process", "done"]
+    assert KB.board_1.columns[2].workers == 2
+    assert KB.board_1.columns[2].processing_time == 8
+
+
+def test_even_index_process_column_can_process_tasks(monkeypatch):
+    monkeypatch.setattr(KB, "load_config", lambda: {
+        "columns": [
+            {"name": "To Do", "type": "queue", "wip_limit": 7, "workers": 0, "processing_time": 0},
+            {"name": "Analysis", "type": "process", "wip_limit": 3, "workers": 1, "processing_time": 1},
+            {"name": "Development", "type": "process", "wip_limit": 4, "workers": 1, "processing_time": 8},
+            {"name": "Done", "type": "done", "wip_limit": 99, "workers": 0, "processing_time": 0},
+        ]
+    })
+    KB.generate_columns()
+    KB.generate_task()
+
+    KB.process_tasks(1)
+    KB.process_tasks(1)
+    KB.process_tasks(2)
+
+    assert KB.board_1.columns[1].tasks == []
+    assert len(KB.board_1.columns[2].tasks) == 1
+    task = KB.board_1.columns[2].tasks[0]
+    assert task.status == 8
+    assert task.worker_task == 1

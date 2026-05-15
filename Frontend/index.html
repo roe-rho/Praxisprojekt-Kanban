@@ -25,7 +25,7 @@
                     <div class="row g-3 align-items-end">
                         <div class="col-12 col-md-6 col-xl-2">
                             <label for="column-count" class="form-label">Column Amount</label>
-                            <input id="column-count" class="form-control form-control-lg" type="number" value="3" min="1">
+                            <input id="column-count" class="form-control form-control-lg" type="number" value="6" min="1">
                         </div>
 
                         <div class="col-12 col-md-6 col-xl-2">
@@ -45,79 +45,7 @@
                 </div>
             </section>
 
-            <section id="kanban-board" class="row g-4 flex-lg-nowrap overflow-auto pb-2">
-                <div class="col-12 col-lg-4 kanban-column-wrap">
-                    <article class="column kanban-column card border-0 h-100" id="col-backlog">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
-                                <div>
-                                    <span class="column-kicker">Queue</span>
-                                    <h2 class="h4 fw-bold mb-0">Backlog</h2>
-                                </div>
-                                <span class="badge rounded-pill text-bg-info">Input</span>
-                            </div>
-
-                            <div class="user-inputs column-settings">
-                                <label for="column_0" class="form-label mb-1">WIP Limit</label>
-                                <input id="column_0" class="form-control form-control-sm" type="number" value="5" min="1">
-                                <div class="count"></div>
-                            </div>
-
-                            <div class="cards task-list"></div>
-                        </div>
-                    </article>
-                </div>
-
-                <div class="col-12 col-lg-4 kanban-column-wrap">
-                    <article class="column kanban-column card border-0 h-100" id="col-doing">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
-                                <div>
-                                    <span class="column-kicker">Active</span>
-                                    <h2 class="h4 fw-bold mb-0">Doing</h2>
-                                </div>
-                                <span class="badge rounded-pill text-bg-primary">Work</span>
-                            </div>
-
-                            <div class="user-inputs column-settings two-fields">
-                                <div>
-                                    <label for="column_1" class="form-label mb-1">WIP Limit</label>
-                                    <input id="column_1" class="form-control form-control-sm" type="number" value="5" min="1">
-                                    <div class="count"></div>
-                                </div>
-                                <div>
-                                    <label for="workers_1" class="form-label mb-1">Worker(s)</label>
-                                    <input id="workers_1" class="form-control form-control-sm" type="number" value="2" min="1">
-                                </div>
-                            </div>
-
-                            <div class="cards task-list"></div>
-                        </div>
-                    </article>
-                </div>
-
-                <div class="col-12 col-lg-4 kanban-column-wrap">
-                    <article class="column kanban-column card border-0 h-100" id="col-testing">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
-                                <div>
-                                    <span class="column-kicker">Output</span>
-                                    <h2 class="h4 fw-bold mb-0">Done</h2>
-                                </div>
-                                <span class="badge rounded-pill text-bg-success">Complete</span>
-                            </div>
-
-                            <div class="user-inputs column-settings">
-                                <label for="column_2" class="form-label mb-1">WIP Limit</label>
-                                <input id="column_2" class="form-control form-control-sm" type="number" value="5" min="1">
-                                <div class="count"></div>
-                            </div>
-
-                            <div class="cards task-list"></div>
-                        </div>
-                    </article>
-                </div>
-            </section>
+            <section id="kanban-board" class="kanban-grid pb-2"></section>
 
             <section id="metrics" class="metrics-panel card border-0 mt-4">
                 <div class="card-body p-4">
