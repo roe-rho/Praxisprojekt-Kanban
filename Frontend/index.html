@@ -20,8 +20,8 @@
                             <div>Speed: </div>
                         </div>
                     <button id = "start-btn">Start</button>
-                    <button id = "pause-btn">Pause</button>
-                    <button id = "stop-btn">Stop(Hold)</button>
+                    <button id = "stop-btn">Stop</button>
+                    <button id = "reset-btn">Reset</button>
                     <button id = "update-btn">Update Configuration</button>
                 </div>
             </section>
@@ -42,35 +42,10 @@
                 </div>
                 <div class="cards"></div>
             </div>
-            <div class="column" id="col-doing-2">
-                <h2>Doing 2</h2>
-                <div class = "user-inputs">
-                <div>WIP Limit:<input id="column_2" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
-                <div>Worker(s): <input id="workers_2" type="number" value="2" min="1" style="width: 40px"></div>
-                </div>
-                <div class="cards"></div>
-            </div>
-            <div class="column" id="col-doing-3">
-                <h2>Doing 3</h2>
-                <div class = "user-inputs">
-                <div>WIP Limit:<input id="column_3" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
-                <div>Worker(s): <input id="workers_3" type="number" value="2" min="1" style="width: 40px"></div>
-                </div>
-                <div class="cards"></div>
-            </div>
-            <div class="column" id="col-doing-4">
-                <h2>Doing 4</h2>
-                <div class = "user-inputs">
-                <div>WIP Limit:<input id="column_4" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
-                <div>Worker(s): <input id="workers_4" type="number" value="2" min="1" style="width: 40px"></div>
-                </div>
-                <div class="cards"></div>
-            </div>
-
             <div class="column" id="col-testing">
                 <h2>Done</h2>
                 <div class = "user-inputs">
-                <div>WIP Limit:<input id="column_5" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
+                <div>WIP Limit:<input id="column_2" type="number" value="5" min="1" style="width: 40px"><div class="count"></div></div>
                 </div>
                 <div class="cards"></div>
             </div>
@@ -83,8 +58,7 @@
                     <p id="clock">Time: 0</p>
                     <p id="day">Day: 0</p>
                     <p id="completed-tasks">Completed Tasks: 0</p>
-                    <p id="total-wip">Work In Progress: 0</p>
-                    <p id="average-cycle-time">Average Cycle Time: 0</p>
+                    <p id="in-progress">Work In Progress: 0</p>
                 </div>
             </div>
         </section>

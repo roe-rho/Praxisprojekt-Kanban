@@ -4,7 +4,6 @@ import Kanban as KB
 
 # Global variable to track if simulation thread is running
 simulation_thread = None
-update_config_thread = None
 
 def start_simulation():
     global simulation_thread
@@ -15,20 +14,17 @@ def start_simulation():
         simulation_thread = threading.Thread(target=KB.main, daemon=True)
         simulation_thread.start()
         return {"status": "Simulation started"}
-    
-    if KB.paused and simulation_thread is not None and simulation_thread.is_alive():
-        KB.paused = False
-        return {"status": "Simulation resumed"}
     return {"status": "Simulation already running"}
 
-def pause_simulation():
-    global simulation_thread
-    """Pause the simulation"""
-    if KB.running and not KB.paused:
-        KB.paused = True
-        return {"status": "Simulation paused"}
-
 def stop_simulation():
+    global simulation_thread
+    """Stop the simulation"""
+    if KB.running:
+        KB.running = False
+        simulation_thread.join()
+        return {"status": "Simulation stopped"}
+
+def reset_simulation():
     """Reset the board"""
     KB.running = False
     
@@ -67,7 +63,6 @@ def get_board_data():
                 'done_at': task.done_at,
                 'status': task.status,
                 'worker_task': task.worker_task,
-                'cycle_time': task.cycle_time,
                 'progress_percent': progress_percent
             })
         board_state[f"column_{i}"] = tasks_list
@@ -82,23 +77,13 @@ def get_clock_and_day():
     if KB.board_1 is None:
         return {"clock": None, "day": None}
     
-    
-    clock = KB.clock
-    day = KB.day
+    if KB.running == True:
+        clock = KB.clock
+        day = KB.day
 
     #print(f"DEBUG api_service.py - clock: {clock}, day: {day}")
 
     return {"clock": clock, "day": day}
-
-def get_metrics():
-    if KB.board_1 is None:
-        return {"average_cycle_time": None, "completed_tasks_count": None}
-    
-    average_cycle_time = KB.board_1.average_cycle_time
-    completed_tasks_count = KB.board_1.completed_tasks_count
-    total_wip = KB.board_1.total_wip
-
-    return {"average_cycle_time": average_cycle_time, "completed_tasks_count": completed_tasks_count, "total_wip": total_wip}
 
 def update_config():
     if KB.board_1 is None:

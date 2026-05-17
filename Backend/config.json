@@ -1,12 +1,6 @@
 {
-  "column_0": "5",
-  "column_1": "5",
+  "column_0": "9",
+  "column_1": "4",
   "column_2": "5",
-  "column_3": "5",
-  "column_4": "5",
-  "column_5": "5",
-  "workers_1": "2",
-  "workers_2": "1",
-  "workers_3": "2",
-  "workers_4": "2"
+  "workers_1": "2"
 }
