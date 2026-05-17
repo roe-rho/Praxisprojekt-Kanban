@@ -1,7 +1,7 @@
 // Get references to the three buttons
 const startBtn = document.getElementById('start-btn');
+const pauseBtn = document.getElementById('pause-btn');
 const stopBtn = document.getElementById('stop-btn');
-const resetBtn = document.getElementById('reset-btn');
 const updateBtn = document.getElementById('update-btn');
 
 // NEW: URL where Backend Flask server is running (must match app.run() host:port)
@@ -44,7 +44,7 @@ function updateBoardDisplay(data) {
     console.log('Board state:', data);
     
     // NEW: List of HTML column IDs in order (matches Backend column_0, column_1, column_2)
-    const columns = ['col-backlog', 'col-doing', 'col-testing'];
+    const columns = ['col-backlog', 'col-doing', 'col-doing-2','col-doing-3','col-doing-4', 'col-testing'];
     
     // NEW: Loop through each column and update it with tasks
     columns.forEach((colId, index) => {
@@ -65,7 +65,7 @@ function updateBoardDisplay(data) {
 
             const taskInfo = document.createElement('div');
             taskInfo.className = 'task-info';
-            taskInfo.textContent = `Task ${task.id} (${task.created_at}) (${task.status}) (Worker: ${task.worker_task})`;
+            taskInfo.textContent = `Task ${task.id} (${task.created_at}) (Worker: ${task.worker_task}) (Cycle Time: ${task.cycle_time})`;
 
             const progressTrack = document.createElement('div');
             progressTrack.className = 'progress-track';
@@ -86,6 +86,20 @@ function updateBoardDisplay(data) {
         });
     });
 }
+
+async function fetchMetricsDisplay() {
+    try {
+        const response = await fetch(`${API_URL}/metrics`);
+        const metrics_data = await response.json();
+        console.log('Metrics data:', metrics_data);
+        document.getElementById('average-cycle-time').textContent = `Average Cycle Time: ${metrics_data.average_cycle_time}`;
+        document.getElementById('completed-tasks').textContent = `Completed Tasks: ${metrics_data.completed_tasks_count}`;
+        document.getElementById('total-wip').textContent = `Total WIP: ${metrics_data.total_wip}`;
+    } catch (error) {
+        console.error('Error fetching metrics:', error);
+    }
+}
+
 
 // NEW: Send commands to the Backend API
 async function callAPI(endpoint) {
@@ -113,55 +127,63 @@ startBtn.addEventListener('click', function() {
     window.alert('Start button clicked.');
     // NEW: Disable Start button, enable Stop button
     startBtn.disabled = true;
-    stopBtn.disabled = false;
+    pauseBtn.disabled = false;
 });
 
-// NEW: Stop button click - call Backend to stop simulation
-stopBtn.addEventListener('click', function() {
-    // NEW: Tell Backend to stop the simulation
-    callAPI('/stop');
+// NEW: Pause button click - call Backend to pause simulation
+pauseBtn.addEventListener('click', function() {
+    // NEW: Tell Backend to pause the simulation
+    callAPI('/pause');
     isRunning = false;
-    console.log('Kanban simulation stopped');
-    //window.alert('Stop button clicked.');
-    // NEW: Enable Start button, disable Stop button
+    console.log('Kanban simulation paused');
+    window.alert('Pause button clicked.');
+    // NEW: Enable Start button, disable Pause button
     startBtn.disabled = false;
-    stopBtn.disabled = true;
+    pauseBtn.disabled = true;
 });
 
 // NEW: Reset button - user must hold for 3 seconds (security feature)
-resetBtn.addEventListener('mousedown', function() {
+stopBtn.addEventListener('mousedown', function() {
     // NEW: Start counting down - if user holds 3 seconds, reset
     holdTimer = setTimeout(function() {
         // NEW: Tell Backend to reset (clear all tasks)
-        callAPI('/reset');
+        callAPI('/stop');
         isRunning = false;
         console.log('Kanban simulation reset');
         // NEW: Reset buttons to initial state
         startBtn.disabled = false;
-        stopBtn.disabled = true;
+        pauseBtn.disabled = true;
     }, HOLD_DURATION);
 });
 
 // NEW: If user releases button before 3 seconds, cancel the reset
-resetBtn.addEventListener('mouseup', function() {
+stopBtn.addEventListener('mouseup', function() {
     clearTimeout(holdTimer);
 });
 
 // NEW: If user moves mouse away from button before 3 seconds, cancel the reset
-resetBtn.addEventListener('mouseleave', function() {
+stopBtn.addEventListener('mouseleave', function() {
     clearTimeout(holdTimer);
 });
 
 updateBtn.addEventListener('click', async function() {
     // NEW: Placeholder for future configuration update logic
+    //window.alert('Update button clicked.');
     const newconfig = {
         column_0: document.getElementById('column_0').value,
         column_1: document.getElementById('column_1').value,
         column_2: document.getElementById('column_2').value,
-        workers_1: document.getElementById('workers_1').value
+        column_3: document.getElementById('column_3').value,
+        column_4: document.getElementById('column_4').value,
+        column_5: document.getElementById('column_5').value,
+        workers_1: document.getElementById('workers_1').value,
+        workers_2: document.getElementById('workers_2').value,
+        workers_3: document.getElementById('workers_3').value,
+        workers_4: document.getElementById('workers_4').value
     };
+    //window.alert('Convig saved');
 
-    if (newconfig.column_0 < 1 || newconfig.column_1 < 1 || newconfig.column_2 < 1 || newconfig.workers_1 < 1) {
+    if (newconfig.column_0 < 1 || newconfig.column_1 < 1 || newconfig.column_2 < 1 || newconfig.column_3 < 1 || newconfig.column_4 < 1 || newconfig.column_5 < 1 || newconfig.workers_1 < 1 || newconfig.workers_2 < 1 || newconfig.workers_3 < 1 || newconfig.workers_4 < 1) {
         window.alert('WIP limits and worker counts must be at least 1.');
         return;
     }   
@@ -172,6 +194,8 @@ updateBtn.addEventListener('click', async function() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newconfig)
         });
+
+        window.alert('Configuration update request sent. Waiting for response...');
 
         const data = await response.json();
 
@@ -186,7 +210,7 @@ updateBtn.addEventListener('click', async function() {
     }
 
 
-    window.alert(`Update button clicked. New WIP limits: Backlog=${newconfig.column_0}, Doing=${newconfig.column_1}, Done=${newconfig.column_2}, Workers=${newconfig.workers_1}`);
+    window.alert(`Update button clicked. New WIP limits: Backlog=${newconfig.column_0}, Doing=${newconfig.column_1}, Doing 2=${newconfig.column_2}, Done=${newconfig.column_3}, Workers 1=${newconfig.workers_1}, Workers 2=${newconfig.workers_2}`);
 });
 
 // NEW: Automatically fetch board state every 2 seconds to keep UI in sync with Backend
@@ -195,5 +219,7 @@ setInterval(fetchBoardState, 100);
 // NEW: Automatically fetch clock and day every 1 second
 setInterval(fetchClockAndDay, 100);
 
+setInterval(fetchMetricsDisplay, 100);
+
 // NEW: Start with Stop button disabled (simulation must start first)
-stopBtn.disabled = true;
+//stopBtn.disabled = true;
