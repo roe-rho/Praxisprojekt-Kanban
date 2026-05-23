@@ -1,6 +1,6 @@
 from flask import Flask, json, jsonify, request, send_from_directory
 from flask_cors import CORS # NEW: Added CORS support so Frontend can talk to Backend from different ports
-from api_service import get_board_data, start_simulation, stop_simulation, reset_simulation, get_clock_and_day, update_config
+from api_service import get_board_data, get_metrics, start_simulation, pause_simulation, stop_simulation, get_clock_and_day, update_config
 import webbrowser # NEW: Import webbrowser to automatically open Frontend in browser
 import Kanban as KB
 import os
@@ -25,9 +25,9 @@ def serve_static(filename):
 #defined in api_service.py
 @app.route('/board', methods=['GET'])
 def board():
-    print("\n\n===== FLASK BOARD ENDPOINT CALLED =====\n\n")
+    #print("\n\n===== FLASK BOARD ENDPOINT CALLED =====\n\n")
     data = get_board_data()
-    print(f"DEBUG: get_board_data function exists: {callable(get_board_data)}")
+    #print(f"DEBUG: get_board_data function exists: {callable(get_board_data)}")
     print(f"\n===== RETURNING DATA: {list(data.keys())} =====\n\n")
     return jsonify(data)
 
@@ -37,26 +37,35 @@ def board():
 def start():
     return jsonify(start_simulation())
 
+@app.route('/pause', methods=['POST'])
+def pause():
+    return jsonify(pause_simulation())
+
 @app.route('/stop', methods=['POST'])
 def stop():
     return jsonify(stop_simulation())
 
-@app.route('/reset', methods=['POST'])
-def reset():
-    return jsonify(reset_simulation())
-
 @app.route('/clock-and-day', methods=['GET'])
 def clock_and_day():
-    print("\n\n===== FLASK CLOCK_AND_DAY ENDPOINT CALLED =====\n\n")
+    #print("\n\n===== FLASK CLOCK_AND_DAY ENDPOINT CALLED =====\n\n")
     data2 = get_clock_and_day()  # Call the revised function
-    print(f"DEBUG: get_clock_and_day function exists: {callable(get_clock_and_day)}")
-    print(f"\n===== RETURNING DATA: {list(data2.keys())} =====\n\n")
+    #print(f"DEBUG: get_clock_and_day function exists: {callable(get_clock_and_day)}")
+    #print(f"\n===== RETURNING DATA: {list(data2.keys())} =====\n\n")
     return jsonify(data2)
+
+@app.route('/metrics', methods=['GET'])
+def metrics():
+    metrics_data = get_metrics()
+    #print(f"\n\n===== FLASK METRICS ENDPOINT CALLED =====\n\n")
+    #print(f"DEBUG: get_metrics function exists: {callable(get_metrics)}")
+    #print(f"Metrics data: {metrics_data}")
+    return jsonify(metrics_data)
+
 
 @app.route('/update-config', methods=['POST'])
 def update_config():
     try:
-        print("\n\n===== FLASK UPDATE_CONFIG ENDPOINT CALLED =====\n\n")
+        #print("\n\n===== FLASK UPDATE_CONFIG ENDPOINT CALLED =====\n\n")
         new_config = request.get_json(silent=True) #I changed the JSON reader so that if no JSON is sent, the app politely returns a clear 400 error instead of crashing. via silent = true, it will return None instead of raising an error if the JSON is invalid or missing.
         if new_config is None:
             return jsonify({"error": "No JSON data provided"}), 400
@@ -83,7 +92,7 @@ def update_config():
 
 
 if __name__ == '__main__':
-   KB.num_columns = 3  # Set number of columns before starting
+   KB.num_columns = 6  # Set number of columns before starting
    KB.generate_columns(KB.num_columns)
 
    webbrowser.open('http://127.0.0.1:5000/')
