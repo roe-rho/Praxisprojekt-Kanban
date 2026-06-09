@@ -124,7 +124,7 @@ startBtn.addEventListener('click', function() {
     callAPI('/start');
     isRunning = true;
     console.log('Kanban simulation started');
-    window.alert('Start button clicked.');
+    //window.alert('Start button clicked.');
     // NEW: Disable Start button, enable Stop button
     //startBtn.disabled = true;
     pauseBtn.disabled = false;
@@ -136,7 +136,7 @@ pauseBtn.addEventListener('click', function() {
     callAPI('/pause');
     isRunning = false;
     console.log('Kanban simulation paused');
-    window.alert('Pause button clicked.');
+    //window.alert('Pause button clicked.');
     // NEW: Enable Start button, disable Pause button
     startBtn.disabled = false;
     pauseBtn.disabled = true;
@@ -196,31 +196,31 @@ updateBtn.addEventListener('click', async function() {
             body: JSON.stringify(newconfig)
         });
 
-        window.alert('Configuration update request sent. Waiting for response...');
+        //window.alert('Configuration update request sent. Waiting for response...');
 
         const data = await response.json();
 
         if (data.success){
             console.log('Configuration updated successfully:', data);
-            window.alert('Configuration updated successfully.');
+            //window.alert('Configuration updated successfully.');
         }
 
     } catch (error) {
         console.error('Error updating configuration:', error);
-        window.alert('Error updating configuration. Please try again.');
+        //window.alert('Error updating configuration. Please try again.');
     }
 
 
-    window.alert(`Update button clicked. New WIP limits: Backlog=${newconfig.column_0}, Doing=${newconfig.column_1}, Doing 2=${newconfig.column_2}, Done=${newconfig.column_3}, Workers 1=${newconfig.workers_1}, Workers 2=${newconfig.workers_2}`);
+    //window.alert(`Update button clicked. New WIP limits: Backlog=${newconfig.column_0}, Doing=${newconfig.column_1}, Doing 2=${newconfig.column_2}, Done=${newconfig.column_3}, Workers 1=${newconfig.workers_1}, Workers 2=${newconfig.workers_2}`);
 });
 
 // NEW: Automatically fetch board state every 2 seconds to keep UI in sync with Backend
-setInterval(fetchBoardState, 100);
+setInterval(fetchBoardState, 1000);
 
 // NEW: Automatically fetch clock and day every 1 second
-setInterval(fetchClockAndDay, 100);
+setInterval(fetchClockAndDay, 1000);
 
-setInterval(fetchMetricsDisplay, 100);
+setInterval(fetchMetricsDisplay, 1000);
 
 // NEW: Start with Stop button disabled (simulation must start first)
 //stopBtn.disabled = true;

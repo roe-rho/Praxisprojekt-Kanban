@@ -9,30 +9,30 @@ update_config_thread = None
 def start_simulation():
     global simulation_thread
     
-    if not KB.running:
-        KB.running = True
+    if not KB.start_event.is_set():
+        KB.start_event.set()
         # Launch main() in background thread so it doesn't block Flask
         simulation_thread = threading.Thread(target=KB.main, daemon=True)
         simulation_thread.start()
         return {"status": "Simulation started"}
     
-    if KB.paused and simulation_thread is not None and simulation_thread.is_alive():
-        KB.paused = False
+    if KB.paused_event.is_set() and simulation_thread is not None and simulation_thread.is_alive():
+        KB.paused_event.clear()
         return {"status": "Simulation resumed"}
     return {"status": "Simulation already running"}
 
 def pause_simulation():
     global simulation_thread
     """Pause the simulation"""
-    if KB.running and not KB.paused:
-        KB.paused = True
+    if KB.start_event.is_set() and not KB.paused_event.is_set():
+        KB.paused_event.set()
         return {"status": "Simulation paused"}
 
 def stop_simulation():
     """Reset the board"""
-    KB.running = False
-    KB.paused = False
-    
+    KB.start_event.clear()
+    KB.paused_event.clear()
+
     with KB.lock:
         if KB.board_1 is not None:
             for col in KB.board_1.columns:
@@ -44,62 +44,66 @@ def stop_simulation():
 
 def get_board_data():
     """Get current board state as JSON-serializable data"""
-    board_state = {}
-    
-    if KB.board_1 is None:
+    with KB.lock:
+        board_state = {}
+        
+        if KB.board_1 is None:
+            return board_state
+
+        for i, col in enumerate(KB.board_1.columns):
+                # Convert Task objects to dictionaries
+            tasks_list = []
+            for task in col.tasks:
+                if task.status is not None and col.processing_time > 0:
+                    progress_percent = ((col.processing_time - task.status) / col.processing_time) * 100
+                    progress_percent = max(0, min(100, round(progress_percent, 2)))
+                elif i == len(KB.board_1.columns) - 1:
+                    progress_percent = 100
+                else:
+                    progress_percent = 0
+
+                tasks_list.append({
+                    'id': task.id,
+                    'name': task.name,
+                    'created_at': task.created_at,
+                    'done_at': task.done_at,
+                    'status': task.status,
+                    'worker_task': task.worker_task,
+                    'cycle_time': task.cycle_time,
+                    'progress_percent': progress_percent
+                })
+            board_state[f"column_{i}"] = tasks_list
+        
+        #print(f"DEBUG api_service.py - board_state keys: {list(board_state.keys())}")
+        #print(f"DEBUG api_service.py - column_0 type: {type(board_state.get('column_0'))}")
+        #print(f"DEBUG api_service.py - column_0 first item type: {type(board_state['column_0'][0]) if board_state.get('column_0') else 'EMPTY'}")
         return board_state
-
-    for i, col in enumerate(KB.board_1.columns):
-            # Convert Task objects to dictionaries
-        tasks_list = []
-        for task in col.tasks:
-            if task.status is not None and col.processing_time > 0:
-                progress_percent = ((col.processing_time - task.status) / col.processing_time) * 100
-                progress_percent = max(0, min(100, round(progress_percent, 2)))
-            elif i == len(KB.board_1.columns) - 1:
-                progress_percent = 100
-            else:
-                progress_percent = 0
-
-            tasks_list.append({
-                'id': task.id,
-                'name': task.name,
-                'created_at': task.created_at,
-                'done_at': task.done_at,
-                'status': task.status,
-                'worker_task': task.worker_task,
-                'cycle_time': task.cycle_time,
-                'progress_percent': progress_percent
-            })
-        board_state[f"column_{i}"] = tasks_list
-    
-    #print(f"DEBUG api_service.py - board_state keys: {list(board_state.keys())}")
-    #print(f"DEBUG api_service.py - column_0 type: {type(board_state.get('column_0'))}")
-    #print(f"DEBUG api_service.py - column_0 first item type: {type(board_state['column_0'][0]) if board_state.get('column_0') else 'EMPTY'}")
-    return board_state
 
 def get_clock_and_day():
 
-    if KB.board_1 is None:
-        return {"clock": None, "day": None}
-    
-    
-    clock = KB.clock
-    day = KB.day
+    with KB.lock:
 
-    #print(f"DEBUG api_service.py - clock: {clock}, day: {day}")
+        if KB.board_1 is None:
+            return {"clock": None, "day": None}
+        
+        
+        clock = KB.clock
+        day = KB.day
 
-    return {"clock": clock, "day": day}
+        #print(f"DEBUG api_service.py - clock: {clock}, day: {day}")
+
+        return {"clock": clock, "day": day}
 
 def get_metrics():
-    if KB.board_1 is None:
-        return {"average_cycle_time": None, "completed_tasks_count": None}
+    with KB.lock:
+        if KB.board_1 is None:
+            return {"average_cycle_time": None, "completed_tasks_count": None}
     
-    average_cycle_time = KB.board_1.average_cycle_time
-    completed_tasks_count = KB.board_1.completed_tasks_count
-    total_wip = KB.board_1.total_wip
+        average_cycle_time = KB.board_1.average_cycle_time
+        completed_tasks_count = KB.board_1.completed_tasks_count
+        total_wip = KB.board_1.total_wip
 
-    return {"average_cycle_time": average_cycle_time, "completed_tasks_count": completed_tasks_count, "total_wip": total_wip}
+        return {"average_cycle_time": average_cycle_time, "completed_tasks_count": completed_tasks_count, "total_wip": total_wip}
 
 def update_config():
     if KB.board_1 is None:
