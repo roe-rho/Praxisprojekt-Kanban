@@ -4,6 +4,9 @@ const resetBtn = document.getElementById('reset-btn');
 const updateBtn = document.getElementById('update-btn');
 const columnCountInput = document.getElementById('column-count');
 const boardContainer = document.getElementById('kanban-board');
+const introScreen = document.getElementById('intro-screen');
+const simulatorScreen = document.getElementById('simulator-screen');
+const introStartBtn = document.getElementById('intro-start-btn');
 
 const API_URL = 'http://localhost:5000';
 const HOLD_DURATION = 3000;
@@ -30,6 +33,44 @@ function getColumnKicker(column) {
     return 'Active';
 }
 
+function initializeTooltips(scope = document) {
+    if (!window.bootstrap || !window.bootstrap.Tooltip) {
+        return;
+    }
+
+    const tooltipElements = scope.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipElements.forEach(element => {
+        const tooltip = window.bootstrap.Tooltip.getOrCreateInstance(element, {
+            boundary: 'viewport',
+            container: 'body',
+            delay: { show: 300, hide: 0 },
+            trigger: 'hover focus'
+        });
+
+        element.addEventListener('show.bs.tooltip', function() {
+            tooltipElements.forEach(otherElement => {
+                if (otherElement !== element) {
+                    const otherTooltip = window.bootstrap.Tooltip.getInstance(otherElement);
+                    if (otherTooltip) {
+                        otherTooltip.hide();
+                    }
+                }
+            });
+        });
+
+        return tooltip;
+    });
+}
+
+function showSimulatorScreen() {
+    introScreen.classList.add('d-none');
+    introScreen.setAttribute('aria-hidden', 'true');
+    simulatorScreen.classList.remove('d-none');
+    simulatorScreen.setAttribute('aria-hidden', 'false');
+    initializeTooltips(simulatorScreen);
+    fetchBoardState();
+}
+
 function renderColumns() {
     boardContainer.innerHTML = '';
     columnCountInput.value = columnDefinitions.length;
@@ -41,8 +82,8 @@ function renderColumns() {
         const workerInput = column.type === 'process'
             ? `
                 <div>
-                    <label for="workers_${column.id}" class="form-label mb-1">Worker(s)</label>
-                    <input id="workers_${column.id}" class="form-control form-control-sm" type="number" value="${column.workers}" min="1">
+                        <label for="workers_${column.id}" class="form-label mb-1">Worker(s)</label>
+                        <input id="workers_${column.id}" class="form-control form-control-sm" type="number" value="${column.workers}" min="1">
                 </div>
             `
             : '';
@@ -79,6 +120,7 @@ function renderColumns() {
 
         boardContainer.appendChild(columnWrap);
     });
+
 }
 
 async function fetchBoardState() {
@@ -247,7 +289,14 @@ updateBtn.addEventListener('click', async function() {
     }
 });
 
+introStartBtn.addEventListener('click', showSimulatorScreen);
+
 renderColumns();
 setInterval(fetchBoardState, 100);
-setInterval(fetchClockAndDay, 100);
+setInterval(function() {
+    if (isRunning) {
+        fetchClockAndDay();
+    }
+}, 100);
+initializeTooltips();
 stopBtn.disabled = true;

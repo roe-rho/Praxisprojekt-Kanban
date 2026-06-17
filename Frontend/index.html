@@ -10,16 +10,144 @@
 </head>
 <body>
     <div class="app-shell">
-        <header class="container py-4 py-lg-5">
-            <section class="hero-panel text-center mx-auto">
-                <span class="badge rounded-pill text-bg-light hero-badge">Kanban Dashboard</span>
-                <h1 class="display-5 fw-bold mt-3 mb-2">Online Kanban Simulation</h1>
-                <p class="lead mb-0">Visualize flow, capacity, work in progress, and task progress in one simple simulation view.</p>
-                <p class="lead mb-0">By Danial and Ronan.</p>
-            </section>
-        </header>
+        <main class="container py-4 py-lg-5">
+            <section id="intro-screen" class="screen-section">
+                <div class="hero-panel text-center mx-auto mb-4">
+                    <span class="badge rounded-pill text-bg-light hero-badge">Kanban Learning</span>
+                    <h1 class="display-5 fw-bold mt-3 mb-2">Online Kanban Simulation</h1>
+                    <p class="lead mb-0">A short guide before you explore how work moves across a Kanban board.</p>
+                    <p class="lead mb-0">By Danial and Ronan.</p>
+                </div>
 
-        <main class="container pb-5">
+                <div class="learning-panel card border-0 mx-auto">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="row g-4 align-items-stretch">
+                            <div class="col-12 col-lg-7">
+                                <span class="column-kicker">Beginner Introduction</span>
+                                <h2 class="h3 fw-bold mt-2 mb-3">What you will see in the simulator</h2>
+                                <p>Kanban is a simple way to visualize work. Instead of hiding tasks in a list, a Kanban board shows where each task is in the workflow.</p>
+                                <p>The columns represent steps such as planning, development, review, testing, and done. Task cards move from left to right as work progresses.</p>
+                                <p>Work in Progress, or WIP, means the amount of work currently being handled. WIP limits help teams avoid starting too many tasks at the same time.</p>
+                                <p class="mb-lg-0">This simulator demonstrates how tasks flow through a board, how capacity affects progress, and how bottlenecks can appear when too much work is active.</p>
+                            </div>
+                            <div class="col-12 col-lg-5">
+                                <div class="learning-summary h-100">
+                                    <h3 class="h5 fw-bold mb-3">Kanban in this simulation</h3>
+                                    <ul class="learning-list">
+                                        <li><strong>Columns</strong> show workflow stages.</li>
+                                        <li><strong>Cards</strong> show single pieces of work.</li>
+                                        <li><strong>Progress bars</strong> show how far a task has moved in its current step.</li>
+                                        <li><strong>Metrics</strong> show time, completed tasks, and current workload.</li>
+                                    </ul>
+                                    <button id="intro-start-btn" class="btn btn-lg btn-primary ronanui-btn mt-3" type="button">
+                                        Start Simulation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <section class="learning-board-section mt-4" aria-label="Static Kanban learning board">
+                            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+                                <div>
+                                    <span class="column-kicker">Static Example</span>
+                                    <h3 class="h4 fw-bold mb-0">Example Kanban Board</h3>
+                                </div>
+                                <span class="learning-flow-note align-self-lg-center" data-bs-toggle="tooltip" data-bs-title="Tasks move from left to right as they get closer to being finished.">
+                                    Left to right flow
+                                </span>
+                            </div>
+
+                            <div class="learning-board" data-bs-toggle="tooltip" data-bs-title="A Kanban board shows work as cards moving through workflow columns.">
+                                <article class="learning-column" data-bs-toggle="tooltip" data-bs-title="Columns represent the steps that work passes through.">
+                                    <div class="learning-column-header">
+                                        <h4>To Do</h4>
+                                        <span class="learning-wip" data-bs-toggle="tooltip" data-bs-title="A WIP limit helps prevent too many tasks from being active at once.">WIP 3</span>
+                                    </div>
+                                    <div class="dummy-card" data-bs-toggle="tooltip" data-bs-title="A card represents one task or one piece of work.">
+                                        Draft feature idea
+                                    </div>
+                                    <div class="dummy-card" data-bs-toggle="tooltip" data-bs-title="Cards wait here until the team has capacity to start them.">
+                                        Prepare test data
+                                    </div>
+                                </article>
+
+                                <article class="learning-column" data-bs-toggle="tooltip" data-bs-title="Analysis means the team is clarifying what needs to be built.">
+                                    <div class="learning-column-header">
+                                        <h4>Analysis</h4>
+                                        <span class="learning-wip">WIP 2</span>
+                                    </div>
+                                    <div class="dummy-card">
+                                        Define acceptance checks
+                                        <div class="dummy-progress progress" data-bs-toggle="tooltip" data-bs-title="A progress bar shows how much of the current step is complete.">
+                                            <div class="progress-bar" style="width: 35%"></div>
+                                            <span>35%</span>
+                                        </div>
+                                    </div>
+                                </article>
+
+                                <article class="learning-column is-busy" data-bs-toggle="tooltip" data-bs-title="A busy column can become a bottleneck when work arrives faster than it can be finished.">
+                                    <div class="learning-column-header">
+                                        <h4>Development</h4>
+                                        <span class="learning-wip">WIP 2</span>
+                                    </div>
+                                    <div class="dummy-card">
+                                        Build board layout
+                                        <div class="dummy-progress progress" data-bs-toggle="tooltip" data-bs-title="Progress grows as work moves through this workflow step.">
+                                            <div class="progress-bar" style="width: 70%"></div>
+                                            <span>70%</span>
+                                        </div>
+                                    </div>
+                                    <div class="dummy-card" data-bs-toggle="tooltip" data-bs-title="Several cards in one step can show a high workload.">
+                                        Connect controls
+                                    </div>
+                                </article>
+
+                                <article class="learning-column" data-bs-toggle="tooltip" data-bs-title="Review checks whether the work is ready before it moves forward.">
+                                    <div class="learning-column-header">
+                                        <h4>Review</h4>
+                                        <span class="learning-wip">WIP 2</span>
+                                    </div>
+                                    <div class="dummy-card">Check code changes</div>
+                                </article>
+
+                                <article class="learning-column" data-bs-toggle="tooltip" data-bs-title="Testing verifies that the task works as expected.">
+                                    <div class="learning-column-header">
+                                        <h4>Testing</h4>
+                                        <span class="learning-wip">WIP 2</span>
+                                    </div>
+                                    <div class="dummy-card">
+                                        Run browser test
+                                        <div class="dummy-progress progress" data-bs-toggle="tooltip" data-bs-title="Progress bars make partially completed work easier to see.">
+                                            <div class="progress-bar" style="width: 50%"></div>
+                                            <span>50%</span>
+                                        </div>
+                                    </div>
+                                </article>
+
+                                <article class="learning-column is-done" data-bs-toggle="tooltip" data-bs-title="Done contains tasks that have completed every step.">
+                                    <div class="learning-column-header">
+                                        <h4>Done</h4>
+                                        <span class="learning-wip">Complete</span>
+                                    </div>
+                                    <div class="dummy-card done-card" data-bs-toggle="tooltip" data-bs-title="Completed tasks are finished work that has reached the end of the board.">
+                                        Intro screen complete
+                                    </div>
+                                </article>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+
+            <section id="simulator-screen" class="screen-section d-none" aria-hidden="true">
+                <header class="mb-4">
+                    <section class="hero-panel text-center mx-auto">
+                        <span class="badge rounded-pill text-bg-light hero-badge">Kanban Dashboard</span>
+                        <h1 class="display-5 fw-bold mt-3 mb-2">Online Kanban Simulation</h1>
+                        <p class="lead mb-0">Visualize flow, capacity, work in progress, and task progress in one simple simulation view.</p>
+                    </section>
+                </header>
+
             <section id="configuration" class="control-card card border-0 mb-4">
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-end">
@@ -35,17 +163,17 @@
 
                         <div class="col-12 col-xl-8">
                             <div class="d-flex flex-column flex-sm-row justify-content-xl-end gap-2 gap-lg-3">
-                                <button id="start-btn" class="btn btn-lg btn-success ronanui-btn">Start</button>
-                                <button id="stop-btn" class="btn btn-lg btn-danger ronanui-btn">Pause</button>
-                                <button id="reset-btn" class="btn btn-lg btn-secondary ronanui-btn" title ="Hold 3 seconds to reset simulation">Reset</button>
-                                <button id="update-btn" class="btn btn-lg btn-primary ronanui-btn">Update Configuration</button>
+                                <button id="start-btn" class="btn btn-lg btn-success ronanui-btn" data-bs-toggle="tooltip" data-bs-title="Starts the backend simulation so new tasks begin moving through the workflow.">Start</button>
+                                <button id="stop-btn" class="btn btn-lg btn-danger ronanui-btn" data-bs-toggle="tooltip" data-bs-title="Pauses the simulation while keeping the current board state visible.">Pause</button>
+                                <button id="reset-btn" class="btn btn-lg btn-secondary ronanui-btn" data-bs-toggle="tooltip" data-bs-title="Hold for 3 seconds to clear tasks and reset the simulation clock.">Reset</button>
+                                <button id="update-btn" class="btn btn-lg btn-primary ronanui-btn" data-bs-toggle="tooltip" data-bs-title="Applies the current WIP limits and worker settings to the simulator.">Update Configuration</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section id="kanban-board" class="kanban-grid pb-2"></section>
+            <section id="kanban-board" class="kanban-grid pb-2" aria-label="Kanban board"></section>
 
             <section id="metrics" class="metrics-panel card border-0 mt-4">
                 <div class="card-body p-4">
@@ -84,6 +212,7 @@
                         </div>
                     </div>
                 </div>
+            </section>
             </section>
         </main>
     </div>
