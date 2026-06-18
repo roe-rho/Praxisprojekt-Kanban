@@ -4,7 +4,7 @@ import Kanban as KB
 
 # Global variable to track if simulation thread is running
 simulation_thread = None
-update_config_thread = None
+#update_config_thread = None
 
 def start_simulation():
     global simulation_thread
@@ -97,13 +97,15 @@ def get_clock_and_day():
 def get_metrics():
     with KB.lock:
         if KB.board_1 is None:
-            return {"average_cycle_time": None, "completed_tasks_count": None}
+            return {"average_cycle_time": None, "average_lead_time": None, "completed_tasks_count": None, "total_wip": None, "throughput": None}
     
         average_cycle_time = KB.board_1.average_cycle_time
+        average_lead_time = KB.board_1.average_lead_time
         completed_tasks_count = KB.board_1.completed_tasks_count
+        throughput = KB.board_1.throughput
         total_wip = KB.board_1.total_wip
 
-        return {"average_cycle_time": average_cycle_time, "completed_tasks_count": completed_tasks_count, "total_wip": total_wip}
+        return {"average_cycle_time": average_cycle_time, "average_lead_time": average_lead_time, "completed_tasks_count": completed_tasks_count, "total_wip": total_wip, "throughput": throughput}
 
 def update_config():
     if KB.board_1 is None:

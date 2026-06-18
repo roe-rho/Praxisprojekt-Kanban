@@ -42,14 +42,17 @@ class Column:
         return f"Column(id={self.id}, name='{self.name}', tasks={len(self.tasks)}/{self.max_tasks}, workers={self.workers}), processing_time={self.processing_time})"
 
 class Task:
-    def __init__(self, id, name, created_at, done_at=None, worker_task=None, status=None, cycle_time=None):
+    def __init__(self, id, name, created_at, created_tick=None, done_at=None, done_tick=None, worker_task=None, status=None, cycle_time=None):
         self.id = id #Task ID
         self.name = name #Task name
         self.created_at = created_at #Time the task was created
+        self.created_tick = created_tick  # Tick at which the task was created
         self.done_at = done_at #Time the task was completed
+        self.done_tick = done_tick  # Tick at which the task was completed
         self.worker_task = worker_task #Worker assigned to the task
         self.status = status #Current status of the task
         self.cycle_time = cycle_time #Time it takes for the task to go from start to finish
+        self.lead_time = None  # Time from task creation to completion (calculated when task is done)
     
     def __repr__(self):
         return f"Task(id={self.id}, name='{self.name}', created_at='{self.created_at}', done_at='{self.done_at}', worker_task='{self.worker_task}', status='{self.status}', cycle_time='{self.cycle_time}')"
@@ -60,8 +63,10 @@ class Board:
         self.total_columns = total_columns  #Total number of columns in the board
         self.total_wip = 0  #Total WIP limit for the board
         self.average_cycle_time = 0  #Average cycle time for completed tasks
+        self.average_lead_time = 0  #Average lead time for completed tasks
         self.completed_tasks = []  #Total number of completed tasks
         self.completed_tasks_count = 0  #Total number of completed tasks (counter)
+        self.throughput = 0  #Throughput of the board (tasks completed per week)
 
 ########################################################################################################################################################################################################################################
 
@@ -125,6 +130,7 @@ def generate_task(): #In Backlog (Column 0)
                 id=id,
                 name=f"Task {id}",
                 created_at=f"Day: {day}, Time: {round(clock, 3)}",
+                created_tick = tick,
                 worker_task = 0,
                 cycle_time = 0
             )
@@ -186,6 +192,8 @@ def done_tasks():
             task = board_1.columns[num_columns - 1].tasks.pop(0)
             board_1.completed_tasks.append(task)
             task.done_at = f"Day: {day}, Time: {round(clock, 3)}"
+            task.done_tick = tick
+            task.lead_time = (task.done_tick - task.created_tick)*10  # Calculate lead time in ticks
     
 
 
@@ -237,6 +245,7 @@ def metrics_management(col):
                 task.cycle_time = hours + minutes / 100
                 task.cycle_time = round(task.cycle_time, 2)  # Round cycle time to 2 decimal places for cleaner display
         
+        
         #Calculate average cycle time for completed tasks
         cycle_times = []
         for task in board_1.columns[col].tasks:
@@ -249,7 +258,23 @@ def metrics_management(col):
 
         average_cycle_time = round(sum(cycle_times) / len(cycle_times), 2) if cycle_times else 0
         board_1.average_cycle_time = average_cycle_time
-            
+
+        #Calculate average lead time
+        lead_times = []
+        for task in board_1.completed_tasks:
+            if task.lead_time is not None:
+                lead_times.append(task.lead_time)
+        
+        for task in board_1.columns[num_columns - 1].tasks:
+            if task.lead_time is not None:
+                lead_times.append(task.lead_time)
+
+        average_lead_time = round(sum(lead_times) / len(lead_times), 2) if lead_times else 0
+        board_1.average_lead_time = round(average_lead_time / 60, 2) if average_lead_time else 0
+
+        #throughput calculation
+        throughput = (len(board_1.completed_tasks) + len(board_1.columns[num_columns - 1].tasks)) / day if day > 0 else 0  # Throughput is the sum of completed tasks and tasks in the done column
+        board_1.throughput = round(throughput, 2)
 
         #Completed Task Calculation
         board_1.completed_tasks_count = len(board_1.completed_tasks) + len(board_1.columns[num_columns - 1].tasks)  #Total completed tasks is the sum of tasks in the done column and the completed tasks list

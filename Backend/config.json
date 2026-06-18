@@ -6,8 +6,8 @@
   "column_4": "5",
   "column_5": "5",
   "tick_interval": "0.1",
-  "workers_1": "4",
-  "workers_2": "3",
+  "workers_1": "2",
+  "workers_2": "2",
   "workers_3": "2",
   "workers_4": "2"
 }

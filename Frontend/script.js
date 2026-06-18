@@ -95,6 +95,8 @@ async function fetchMetricsDisplay() {
         document.getElementById('average-cycle-time').textContent = `Average Cycle Time: ${metrics_data.average_cycle_time}`;
         document.getElementById('completed-tasks').textContent = `Completed Tasks: ${metrics_data.completed_tasks_count}`;
         document.getElementById('total-wip').textContent = `Total WIP: ${metrics_data.total_wip}`;
+        document.getElementById('average-lead-time').textContent = `Average Lead Time: ${metrics_data.average_lead_time}`;
+        document.getElementById('throughput').textContent = `Throughput: ${metrics_data.throughput} per day`;
     } catch (error) {
         console.error('Error fetching metrics:', error);
     }
@@ -215,12 +217,12 @@ updateBtn.addEventListener('click', async function() {
 });
 
 // NEW: Automatically fetch board state every 2 seconds to keep UI in sync with Backend
-setInterval(fetchBoardState, 1000);
+setInterval(fetchBoardState, 500);
 
 // NEW: Automatically fetch clock and day every 1 second
-setInterval(fetchClockAndDay, 1000);
+setInterval(fetchClockAndDay, 500);
 
-setInterval(fetchMetricsDisplay, 1000);
+setInterval(fetchMetricsDisplay, 500);
 
 // NEW: Start with Stop button disabled (simulation must start first)
 //stopBtn.disabled = true;
