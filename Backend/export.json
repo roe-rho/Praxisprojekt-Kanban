@@ -1,0 +1,792 @@
+{
+  "Time Elapsed": [
+    {
+      "Time [9am - 5pm]": "15.00",
+      "Day": 2
+    }
+  ],
+  "config_changes": [
+    {
+      "Column id": 0,
+      "Column name": "Column 0",
+      "Initial WIP Limit": 5,
+      "Initial Total Workers": 2
+    },
+    {
+      "Column id": 1,
+      "Column name": "Column 1",
+      "Initial WIP Limit": 5,
+      "Initial Total Workers": 2
+    },
+    {
+      "Column id": 2,
+      "Column name": "Column 2",
+      "Initial WIP Limit": 5,
+      "Initial Total Workers": 2
+    },
+    {
+      "Column id": 3,
+      "Column name": "Column 3",
+      "Initial WIP Limit": 5,
+      "Initial Total Workers": 2
+    },
+    {
+      "Column id": 4,
+      "Column name": "Column 4",
+      "Initial WIP Limit": 5,
+      "Initial Total Workers": 2
+    },
+    {
+      "Column id": 5,
+      "Column name": "Column 5",
+      "Initial WIP Limit": 5,
+      "Initial Total Workers": 2
+    },
+    {
+      "[CONFIG]": "[UPDATED]",
+      "Update Time [Day, Time]": "Day: 1, Time: 12.10",
+      "Updated WIP Limits": {
+        "column_0": 5,
+        "column_1": 5,
+        "column_2": 5,
+        "column_3": 5,
+        "column_4": 5,
+        "column_5": 5
+      },
+      "Updated Total Workers": {
+        "column_0": 2,
+        "column_1": 3,
+        "column_2": 2,
+        "column_3": 2,
+        "column_4": 2,
+        "column_5": 2
+      }
+    },
+    {
+      "[CONFIG]": "[UPDATED]",
+      "Update Time [Day, Time]": "Day: 1, Time: 13.30",
+      "Updated WIP Limits": {
+        "column_0": 5,
+        "column_1": 4,
+        "column_2": 5,
+        "column_3": 5,
+        "column_4": 5,
+        "column_5": 5
+      },
+      "Updated Total Workers": {
+        "column_0": 2,
+        "column_1": 3,
+        "column_2": 2,
+        "column_3": 2,
+        "column_4": 2,
+        "column_5": 2
+      }
+    }
+  ],
+  "Columns": [
+    {
+      "Column id": 0,
+      "Column name": "Column 0",
+      "WIP Limit": 5,
+      "Total Workers": 2,
+      "Unassigned workers": 0,
+      "Tasks amount": 5
+    },
+    {
+      "Column id": 1,
+      "Column name": "Column 1",
+      "WIP Limit": 4,
+      "Total Workers": 3,
+      "Unassigned workers": 1,
+      "Tasks amount": 4
+    },
+    {
+      "Column id": 2,
+      "Column name": "Column 2",
+      "WIP Limit": 5,
+      "Total Workers": 2,
+      "Unassigned workers": 0,
+      "Tasks amount": 4
+    },
+    {
+      "Column id": 3,
+      "Column name": "Column 3",
+      "WIP Limit": 5,
+      "Total Workers": 2,
+      "Unassigned workers": 0,
+      "Tasks amount": 3
+    },
+    {
+      "Column id": 4,
+      "Column name": "Column 4",
+      "WIP Limit": 5,
+      "Total Workers": 2,
+      "Unassigned workers": 0,
+      "Tasks amount": 2
+    },
+    {
+      "Column id": 5,
+      "Column name": "Column 5",
+      "WIP Limit": 5,
+      "Total Workers": 2,
+      "Unassigned workers": 0,
+      "Tasks amount": 5
+    }
+  ],
+  "Tasks": [
+    {
+      "Task id": 1,
+      "Task name": "Task 1",
+      "Created at": "Day: 1, Time: 9.1",
+      "Done at": "Day: 1, Time: 16.5",
+      "Status": "Completed",
+      "Worker task": 0,
+      "Cycle time (Minutes)": 460,
+      "Lead time (Minutes)": 460,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        0,
+        110,
+        120,
+        120,
+        110
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.10",
+        "9.10",
+        "11.00",
+        "13.00",
+        "15.00"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.10",
+        "11.00",
+        "13.00",
+        "15.00",
+        "16.50"
+      ]
+    },
+    {
+      "Task id": 2,
+      "Task name": "Task 2",
+      "Created at": "Day: 1, Time: 9.2",
+      "Done at": "Day: 1, Time: 17.0",
+      "Status": "Completed",
+      "Worker task": 0,
+      "Cycle time (Minutes)": 460,
+      "Lead time (Minutes)": 460,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        0,
+        110,
+        120,
+        120,
+        110
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.20",
+        "9.20",
+        "11.10",
+        "13.10",
+        "15.10"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.20",
+        "11.10",
+        "13.10",
+        "15.10",
+        "17.00"
+      ]
+    },
+    {
+      "Task id": 3,
+      "Task name": "Task 3",
+      "Created at": "Day: 1, Time: 9.3",
+      "Done at": "Day: 2, Time: 10.2",
+      "Status": "Completed",
+      "Worker task": 0,
+      "Cycle time (Minutes)": 540,
+      "Lead time (Minutes)": 540,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        0,
+        200,
+        120,
+        110,
+        110
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.30",
+        "9.30",
+        "12.50",
+        "14.50",
+        "16.40"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.30",
+        "12.50",
+        "14.50",
+        "16.40",
+        "10.20"
+      ]
+    },
+    {
+      "Task id": 4,
+      "Task name": "Task 4",
+      "Created at": "Day: 1, Time: 9.4",
+      "Done at": "Day: 2, Time: 10.3",
+      "Status": "Completed",
+      "Worker task": 0,
+      "Cycle time (Minutes)": 540,
+      "Lead time (Minutes)": 540,
+      "Current column": 4,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        0,
+        200,
+        120,
+        110,
+        110
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.40",
+        "9.40",
+        "13.00",
+        "15.00",
+        "16.50"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.40",
+        "13.00",
+        "15.00",
+        "16.50",
+        "10.30"
+      ]
+    },
+    {
+      "Task id": 5,
+      "Task name": "Task 5",
+      "Created at": "Day: 1, Time: 9.5",
+      "Done at": "Day: 2, Time: 12.0",
+      "Status": "Completed",
+      "Worker task": 0,
+      "Cycle time (Minutes)": 620,
+      "Lead time (Minutes)": 620,
+      "Current column": 4,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        0,
+        270,
+        130,
+        110,
+        110
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.50",
+        "9.50",
+        "14.20",
+        "16.30",
+        "10.10"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.50",
+        "14.20",
+        "16.30",
+        "10.10",
+        "12.00"
+      ]
+    },
+    {
+      "Task id": 6,
+      "Task name": "Task 6",
+      "Created at": "Day: 1, Time: 10.0",
+      "Done at": "Day: 2, Time: 12.1",
+      "Status": "Completed",
+      "Worker task": 0,
+      "Cycle time (Minutes)": 550,
+      "Lead time (Minutes)": 620,
+      "Current column": 4,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        7,
+        210,
+        120,
+        110,
+        110
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "10.00",
+        "11.10",
+        "14.40",
+        "16.40",
+        "10.20"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "11.10",
+        "14.40",
+        "16.40",
+        "10.20",
+        "12.10"
+      ]
+    },
+    {
+      "Task id": 7,
+      "Task name": "Task 7",
+      "Created at": "Day: 1, Time: 10.1",
+      "Done at": "Day: 2, Time: 13.4",
+      "Status": "Completed",
+      "Worker task": 0,
+      "Cycle time (Minutes)": 630,
+      "Lead time (Minutes)": 700,
+      "Current column": 4,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        7,
+        210,
+        200,
+        110,
+        110
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "10.10",
+        "11.20",
+        "14.50",
+        "10.00",
+        "11.50"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "11.20",
+        "14.50",
+        "10.00",
+        "11.50",
+        "13.40"
+      ]
+    },
+    {
+      "Task id": 8,
+      "Task name": "Task 8",
+      "Created at": "Day: 1, Time: 10.2",
+      "Done at": "Day: 2, Time: 13.5",
+      "Status": "Completed",
+      "Worker task": 0,
+      "Cycle time (Minutes)": 540,
+      "Lead time (Minutes)": 700,
+      "Current column": 4,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        16,
+        180,
+        140,
+        110,
+        110
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "10.20",
+        "13.00",
+        "16.00",
+        "10.10",
+        "12.00"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "13.00",
+        "16.00",
+        "10.10",
+        "12.00",
+        "13.50"
+      ]
+    },
+    {
+      "Task id": 9,
+      "Task name": "Task 9",
+      "Created at": "Day: 1, Time: 10.3",
+      "Done at": null,
+      "Status": 1,
+      "Worker task": 1,
+      "Cycle time (Minutes)": 610,
+      "Lead time (Minutes)": null,
+      "Current column": 4,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        16,
+        190,
+        210,
+        110
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "10.30",
+        "13.10",
+        "16.20",
+        "11.40",
+        "13.30"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "13.10",
+        "16.20",
+        "11.40",
+        "13.30"
+      ]
+    },
+    {
+      "Task id": 10,
+      "Task name": "Task 10",
+      "Created at": "Day: 1, Time: 10.4",
+      "Done at": null,
+      "Status": 2,
+      "Worker task": 1,
+      "Cycle time (Minutes)": 510,
+      "Lead time (Minutes)": null,
+      "Current column": 4,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        25,
+        110,
+        200,
+        110
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "10.40",
+        "14.50",
+        "16.40",
+        "11.50",
+        "13.40"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "14.50",
+        "16.40",
+        "11.50",
+        "13.40"
+      ]
+    },
+    {
+      "Task id": 11,
+      "Task name": "Task 11",
+      "Created at": "Day: 1, Time: 11.2",
+      "Done at": null,
+      "Status": 0,
+      "Worker task": 0,
+      "Cycle time (Minutes)": 500,
+      "Lead time (Minutes)": null,
+      "Current column": 3,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        22,
+        160,
+        230
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "11.20",
+        "15.00",
+        "9.30",
+        "13.20"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "15.00",
+        "9.30",
+        "13.20"
+      ]
+    },
+    {
+      "Task id": 12,
+      "Task name": "Task 12",
+      "Created at": "Day: 1, Time: 11.3",
+      "Done at": null,
+      "Status": 1,
+      "Worker task": 1,
+      "Cycle time (Minutes)": 430,
+      "Lead time (Minutes)": null,
+      "Current column": 3,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        28,
+        130,
+        200
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "11.30",
+        "16.10",
+        "10.10",
+        "13.30"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "16.10",
+        "10.10",
+        "13.30"
+      ]
+    },
+    {
+      "Task id": 13,
+      "Task name": "Task 13",
+      "Created at": "Day: 1, Time: 13.1",
+      "Done at": null,
+      "Status": 10,
+      "Worker task": 1,
+      "Cycle time (Minutes)": 410,
+      "Lead time (Minutes)": null,
+      "Current column": 3,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        20,
+        120,
+        280
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "13.10",
+        "16.30",
+        "10.20",
+        "15.00"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "16.30",
+        "10.20",
+        "15.00"
+      ]
+    },
+    {
+      "Task id": 14,
+      "Task name": "Task 14",
+      "Created at": "Day: 1, Time: 13.2",
+      "Done at": null,
+      "Status": 0,
+      "Worker task": 0,
+      "Cycle time (Minutes)": 390,
+      "Lead time (Minutes)": null,
+      "Current column": 2,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        21,
+        190
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "13.20",
+        "16.50",
+        "11.50"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "16.50",
+        "11.50"
+      ]
+    },
+    {
+      "Task id": 15,
+      "Task name": "Task 15",
+      "Created at": "Day: 1, Time: 15.0",
+      "Done at": null,
+      "Status": 9,
+      "Worker task": 1,
+      "Cycle time (Minutes)": 330,
+      "Lead time (Minutes)": null,
+      "Current column": 2,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        17,
+        140
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "15.00",
+        "9.40",
+        "12.00"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.40",
+        "12.00"
+      ]
+    },
+    {
+      "Task id": 16,
+      "Task name": "Task 16",
+      "Created at": "Day: 1, Time: 15.1",
+      "Done at": null,
+      "Status": 10,
+      "Worker task": 1,
+      "Cycle time (Minutes)": 290,
+      "Lead time (Minutes)": null,
+      "Current column": 2,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        20,
+        190
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "15.10",
+        "10.20",
+        "13.30"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "10.20",
+        "13.30"
+      ]
+    },
+    {
+      "Task id": 17,
+      "Task name": "Task 17",
+      "Created at": "Day: 1, Time: 16.2",
+      "Done at": null,
+      "Status": 10,
+      "Worker task": 0,
+      "Cycle time (Minutes)": 280,
+      "Lead time (Minutes)": null,
+      "Current column": 2,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        14,
+        190
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "16.20",
+        "10.30",
+        "13.40"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "10.30",
+        "13.40"
+      ]
+    },
+    {
+      "Task id": 18,
+      "Task name": "Task 18",
+      "Created at": "Day: 1, Time: 16.4",
+      "Done at": null,
+      "Status": 0,
+      "Worker task": 0,
+      "Cycle time (Minutes)": 190,
+      "Lead time (Minutes)": null,
+      "Current column": 1,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        21
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "16.40",
+        "12.00"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "12.00"
+      ]
+    },
+    {
+      "Task id": 19,
+      "Task name": "Task 19",
+      "Created at": "Day: 1, Time: 17.0",
+      "Done at": null,
+      "Status": 0,
+      "Worker task": 0,
+      "Cycle time (Minutes)": 180,
+      "Lead time (Minutes)": null,
+      "Current column": 1,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        20
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "17.00",
+        "12.10"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "12.10"
+      ]
+    },
+    {
+      "Task id": 20,
+      "Task name": "Task 20",
+      "Created at": "Day: 2, Time: 9.5",
+      "Done at": null,
+      "Status": 2,
+      "Worker task": 1,
+      "Cycle time (Minutes)": 90,
+      "Lead time (Minutes)": null,
+      "Current column": 1,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        23
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "9.50",
+        "13.40"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "13.40"
+      ]
+    },
+    {
+      "Task id": 21,
+      "Task name": "Task 21",
+      "Created at": "Day: 2, Time: 10.3",
+      "Done at": null,
+      "Status": 3,
+      "Worker task": 1,
+      "Cycle time (Minutes)": 80,
+      "Lead time (Minutes)": null,
+      "Current column": 1,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        20
+      ],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "10.30",
+        "13.50"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "13.50"
+      ]
+    },
+    {
+      "Task id": 22,
+      "Task name": "Task 22",
+      "Created at": "Day: 2, Time: 10.4",
+      "Done at": null,
+      "Status": null,
+      "Worker task": 0,
+      "Cycle time (Minutes)": 0,
+      "Lead time (Minutes)": null,
+      "Current column": 0,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "10.40"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": []
+    },
+    {
+      "Task id": 23,
+      "Task name": "Task 23",
+      "Created at": "Day: 2, Time: 12.1",
+      "Done at": null,
+      "Status": null,
+      "Worker task": 0,
+      "Cycle time (Minutes)": 0,
+      "Lead time (Minutes)": null,
+      "Current column": 0,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "12.10"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": []
+    },
+    {
+      "Task id": 24,
+      "Task name": "Task 24",
+      "Created at": "Day: 2, Time: 12.2",
+      "Done at": null,
+      "Status": null,
+      "Worker task": 0,
+      "Cycle time (Minutes)": 0,
+      "Lead time (Minutes)": null,
+      "Current column": 0,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "12.20"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": []
+    },
+    {
+      "Task id": 25,
+      "Task name": "Task 25",
+      "Created at": "Day: 2, Time: 13.5",
+      "Done at": null,
+      "Status": null,
+      "Worker task": 0,
+      "Cycle time (Minutes)": 0,
+      "Lead time (Minutes)": null,
+      "Current column": 0,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "13.50"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": []
+    },
+    {
+      "Task id": 26,
+      "Task name": "Task 26",
+      "Created at": "Day: 2, Time: 14.0",
+      "Done at": null,
+      "Status": null,
+      "Worker task": 0,
+      "Cycle time (Minutes)": 0,
+      "Lead time (Minutes)": null,
+      "Current column": 0,
+      "Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]": [],
+      "Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]": [
+        "14.00"
+      ],
+      "Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]": []
+    }
+  ]
+}

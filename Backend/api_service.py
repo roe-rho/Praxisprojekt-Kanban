@@ -1,10 +1,14 @@
 # Backend/api_service.py to simplify connection between frontend and backend
+import os
+import os
 import threading
+import time
 import Kanban as KB
+import json
 
 # Global variable to track if simulation thread is running
 simulation_thread = None
-#update_config_thread = None
+export_thread = None
 
 def start_simulation():
     global simulation_thread
@@ -14,6 +18,8 @@ def start_simulation():
         # Launch main() in background thread so it doesn't block Flask
         simulation_thread = threading.Thread(target=KB.main, daemon=True)
         simulation_thread.start()
+        export_thread = threading.Thread(target=export_management, daemon=True)
+        export_thread.start()
         return {"status": "Simulation started"}
     
     if KB.paused_event.is_set() and simulation_thread is not None and simulation_thread.is_alive():
@@ -127,4 +133,76 @@ def update_config():
     
     return wip_limit_updated
 
-       
+def export_management():
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    export_path = os.path.join(backend_dir, 'export.json')
+    while True:
+        if KB.board_1 is not None:
+            with KB.lock:
+                Tasks =[]
+                Tasks_completed = []
+                Columns =[]
+                Time_Elapsed = []
+                config_changes = []
+
+                Time_Elapsed.append({
+                    'Time [9am - 5pm]': f"{KB.clock:.2f}",
+                    'Day': KB.day
+                })
+
+                for col in KB.board_1.columns[::-1]:
+                    for task in col.tasks:
+                        Tasks.append({
+                            'Task id': task.id,
+                            'Task name': task.name,
+                            'Created at': task.created_at,
+                            'Done at': task.done_at,
+                            'Status': task.status,
+                            'Worker task': task.worker_task,
+                            'Cycle time (Minutes)': task.cycle_time,
+                            'Lead time (Minutes)': task.lead_time,
+                            'Current column': task.current_column,
+                            'Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]': task.cycle_time_column,
+                            'Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]': task.column_entry_time,
+                            'Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]': task.column_exit_time
+                        })
+
+                for col in KB.board_1.columns:
+                    Columns.append({
+                        'Column id': col.id,
+                        'Column name': col.name,
+                        'WIP Limit': col.max_tasks,
+                        'Total Workers': col.initial_workers,
+                        'Unassigned workers': col.workers,
+                        'Tasks amount': len(col.tasks)
+                    })
+                
+                for config in KB.board_1.configs:
+                    config_changes.append(config)
+                    
+                for task in KB.board_1.completed_tasks:
+                    Tasks_completed.append({
+                        'Task id': task.id,
+                        'Task name': task.name,
+                        'Created at': task.created_at,
+                        'Done at': task.done_at,
+                        'Status': task.status,
+                        'Worker task': task.worker_task,
+                        'Cycle time (Minutes)': task.cycle_time,
+                        'Lead time (Minutes)': task.lead_time,
+                        #'Current column': task.current_column,
+                        'Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]': task.cycle_time_column,
+                        'Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]': task.column_entry_time,
+                        'Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]': task.column_exit_time
+
+                        })
+                    
+                all_task = Tasks_completed + Tasks
+
+                with open(export_path, 'w') as f:
+                    #json.dump({"tasks": Tasks}, f, indent=2)
+                    json.dump({"Time Elapsed": Time_Elapsed,"config_changes": config_changes, "Columns": Columns, "Tasks" : all_task}, f, indent=2)
+        
+        while KB.paused_event.is_set():
+            time.sleep(0.1)  # Sleep while paused or not started to avoid busy waiting
+        time.sleep(0.5)  # Check for updates every second
