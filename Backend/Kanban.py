@@ -33,12 +33,12 @@ class Column:
     def __init__(self, id, name, max_tasks, workers_column, initial_workers_column, processing_time, average_cycle_time_column=0):
         self.id = id #Column ID
         self.name = name #Column name
-        self.tasks = [] #List of tasks currently in the column
-        self.max_tasks = max_tasks #Maximum number of tasks that can be in the column at once (WIP limit)
-        self.workers = workers_column #Number of workers assigned to the column (Unused)
-        self.initial_workers = initial_workers_column #Store the initial number of workers for reset purposes
+        self.tasks = [] #Tasks in Column
+        self.max_tasks = max_tasks #WIP limit
+        self.workers = workers_column #Number of column workers
+        self.initial_workers = initial_workers_column #Initial number of column workers (NEW NEW!)
         self.processing_time = processing_time #Time it takes to process a task in the column
-        self.average_cycle_time_column = average_cycle_time_column  # Average cycle time for tasks in this column (calculated in metrics_management)
+        self.average_cycle_time_column = average_cycle_time_column  # Unused
 
     def __repr__(self):
         return f"Column(id={self.id}, name='{self.name}', tasks={len(self.tasks)}/{self.max_tasks}, workers={self.workers}),initial_workers={self.initial_workers}, processing_time={self.processing_time}, average_cycle_time={self.average_cycle_time_column})"
@@ -55,12 +55,12 @@ class Task:
         self.status = status #Current status of the task
         self.cycle_time = cycle_time #Time it takes for the task to go from start to finish
         self.lead_time = None  # Time from task creation to completion (calculated when task is done)
-        self.current_column = current_column  # Track the current column of the task for progress calculation
-        self.cycle_time_column = []  # List to track cycle time spent in each column for the task
-        self.column_history = []  # Dictionary to track cycle time spent in each column for the task
-        self.column_entry_time = []  # List to track the tick at which the task entered each column
-        self.column_exit_time = []  # List to track the tick at which the task exited each column
-        self.column_entry_tick = []  # Tick at which the task entered the current column
+        self.current_column = current_column  # Track the current column of the task for progress calculation (NEW NEW!)
+        self.cycle_time_column = []  # List to track cycle time spent in each column for the task (NEW NEW!)
+        self.column_history = []  # Dictionary to track cycle time spent in each column for the task (NEW NEW!)
+        self.column_entry_time = []  # List to track the tick at which the task entered each column (NEW NEW!)
+        self.column_exit_time = []  # List to track the tick at which the task exited each column (NEW NEW!)
+        self.column_entry_tick = []  # Tick at which the task entered the current column (NEW NEW!)
 
     
     def __repr__(self):
@@ -76,7 +76,7 @@ class Board:
         self.completed_tasks = []  #Total number of completed tasks
         self.completed_tasks_count = 0  #Total number of completed tasks (counter)
         self.throughput = 0  #Throughput of the board (tasks completed per week)
-        self.configs = []  #List of configuration changes made to the board
+        self.configs = []  #List of configuration changes made to the board (NEW NEW!)
 
 ########################################################################################################################################################################################################################################
 
@@ -110,16 +110,16 @@ def generate_columns(n):
     #Generate n number of columns (Unused, default = 3)
     board_1 = Board(total_columns=n)
     
-    #Assign column attributes (i = number ie. Column 0, 1, 2, etc)
+    #Assign column attributes
     for i in range(n):
         
         col = Column(
             id=i,
             name=f"Column {i}",
-            max_tasks=5,  # Get WIP limit from config.json
-            initial_workers_column=2,  # Get initial workers from config.json
-            workers_column=2,   #Unused, default = 2 workers per column
-            processing_time=10    #Default processing time is 10 ticks (10 seconds if tick_interval is 1 second)
+            max_tasks=5,  # Initial WIP Limit
+            initial_workers_column=2,  # Initial worker count
+            workers_column=2,   # Current worker count
+            processing_time=10    #Default processing time (10 minutes per tick)
         )
 
         if col.id == 0 or col.id == n-1:
@@ -128,6 +128,7 @@ def generate_columns(n):
         
         
         board_1.columns.append(col)
+        #Initial column config (NEW NEW!)
         board_1.configs.append({
             'Column id': col.id,
             'Column name': col.name,
@@ -162,7 +163,7 @@ def process_tasks(col):
         if col == 0 and len(board_1.columns[col].tasks) > 0 and len(board_1.columns[col + 1].tasks) < board_1.columns[col + 1].max_tasks:
             task = board_1.columns[col].tasks.pop(0)    #Remove the first task from the previous column
             board_1.columns[col + 1].tasks.append(task)     #Add the task to the current column
-            task.column_entry_tick.append(tick)  # Record the tick at which the task entered the new column]
+            task.column_entry_tick.append(tick)  # Record the tick at which the task entered the new column
             task.column_entry_time.append(f"{clock:.2f}")  # Record the time the task entered the new column
             task.column_exit_time.append(f"{clock:.2f}")  # Record the time the task exited the previous column
             backlog_cycle_time = tick - task.created_tick  # Calculate cycle time in ticks for the backlog
@@ -184,7 +185,6 @@ def process_tasks(col):
                 task.current_column = col  # Update the task's current column for progress calculation
         
                 #If task is done (status <= 0) and it's not the last column, move it to the next column if there is space
-
                 if col + 2 < num_columns and  len(board_1.columns[col + 1].tasks) < board_1.columns[col + 1].max_tasks and task.status <= 0 and task.worker_task <= 0 and i == 0:
                     board_1.columns[col].tasks.remove(task)
                     board_1.columns[col + 1].tasks.append(task)
@@ -195,11 +195,11 @@ def process_tasks(col):
                     col_cycle_time = tick - task.column_entry_tick[-2]  # Calculate cycle time in ticks for the current column
                     task.cycle_time_column.append(col_cycle_time*10)  # Record the cycle time for the current column
                     
+                #Handles the second last column (before done column)
                 elif col + 2 >= num_columns and col == num_columns - 2 and col != 0 and task.status <= 0 and task.worker_task <= 0 and i == 0:
                     board_1.columns[col].tasks.remove(task)
                     board_1.columns[col + 1].tasks.append(task)
                     task.status = 'Completed'
-                    #task.column_entry_tick.append(tick)  # Record the tick at which the task entered the new column
                     task.column_entry_tick.append(tick)
                     task.column_exit_time.append(f"{clock:.2f}")  # Record the time the task exited the previous column
                     col_cycle_time = tick - task.column_entry_tick[-2]  # Calculate cycle time in ticks for the current column
@@ -224,25 +224,13 @@ def process_tasks(col):
                     task.worker_task = 0 
                     board_1.columns[col].workers += 1 
             
-        #if len(board_1.columns[num_columns - 1].tasks) > 0:      
-            #for tasks in board_1.columns[num_columns - 1].tasks:
-                #tasks.status = 'Completed'  # Set status to 'Completed' for tasks in the last column to indicate they are done
-                #task.done_at = f"Day: {day}, Time: {round(clock, 3)}"
-                #task.done_tick = tick
-                #task.lead_time = (task.done_tick - task.created_tick)*10  # Calculate lead time in ticks
 
-
+#Move tasks from done column to invisible column
 def done_tasks():
-    #If the last column has tasks and the first task in the last column is done, remove it from the board and set its done_at time
-    #if num_columns%2 != 0:
     with lock:
         if len(board_1.columns[num_columns - 1].tasks) >= board_1.columns[num_columns - 1].max_tasks + 1:
-                
             task = board_1.columns[num_columns - 1].tasks.pop(0)
             board_1.completed_tasks.append(task)
-            #task.done_at = f"Day: {day}, Time: {round(clock, 3)}"
-            #task.done_tick = tick
-            #task.lead_time = (task.done_tick - task.created_tick)*10  # Calculate lead time in ticks
             task.status = "Completed"
     
 
@@ -279,6 +267,7 @@ def update_config():
         tick_interval =  float(new_config.get("tick_interval", tick_interval))  # Update tick interval if specified in config, otherwise keep current value
         print(f"Tick interval updated to {tick_interval} seconds.")
     
+        #Add config change to board_1.configs for export (NEW NEW!)
         board_1.configs.append({
             '[CONFIG]': '[UPDATED]',
             'Update Time [Day, Time]': f"Day: {day}, Time: {f'{clock:.2f}'}",
@@ -293,14 +282,6 @@ def metrics_management(col):
         if col != 0 and col != num_columns - 1:
             for task in board_1.columns[col].tasks:
                 task.cycle_time += 10  #Increase cycle time by 10 minutes for every tick the task is being processed
-                #hours = int(task.cycle_time)
-                #minutes = round((task.cycle_time - hours) * 100)
-
-                #if minutes >= 60:
-                    #hours += 1
-                    #minutes -= 60
-                
-                #task.cycle_time = hours + minutes #/ 100
                 task.cycle_time = round(task.cycle_time, 2)  # Round cycle time to 2 decimal places for cleaner display
         
         
@@ -316,6 +297,7 @@ def metrics_management(col):
 
         average_cycle_time = round(sum(cycle_times) / len(cycle_times), 2) if cycle_times else 0
         board_1.average_cycle_time = average_cycle_time
+
 
         #Calculate average lead time
         lead_times = []
@@ -336,7 +318,7 @@ def metrics_management(col):
 
         #Completed Task Calculation
         board_1.completed_tasks_count = len(board_1.completed_tasks) + len(board_1.columns[num_columns - 1].tasks)  #Total completed tasks is the sum of tasks in the done column and the completed tasks list
-        #print(f"Total completed tasks: {board_1.completed_tasks_count}")
+        
 
                 
         #Total WIP
@@ -362,7 +344,6 @@ def main():
     global day
     global config_updated
     global initial_gen
-    #running = True
     tick = 0
     id = 0
     clock = 9.00

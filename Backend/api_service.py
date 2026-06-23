@@ -18,6 +18,7 @@ def start_simulation():
         # Launch main() in background thread so it doesn't block Flask
         simulation_thread = threading.Thread(target=KB.main, daemon=True)
         simulation_thread.start()
+        # Launch export_management() in background thread so it doesn't block Flask
         export_thread = threading.Thread(target=export_management, daemon=True)
         export_thread.start()
         return {"status": "Simulation started"}
@@ -133,8 +134,11 @@ def update_config():
     
     return wip_limit_updated
 
+#Data preparations for export (NEW NEW!)
 def export_management():
+    # Get the Backend directory path
     backend_dir = os.path.dirname(os.path.abspath(__file__))
+    # Define the export file path
     export_path = os.path.join(backend_dir, 'export.json')
     while True:
         if KB.board_1 is not None:
@@ -145,11 +149,13 @@ def export_management():
                 Time_Elapsed = []
                 config_changes = []
 
+                #For time and day
                 Time_Elapsed.append({
                     'Time [9am - 5pm]': f"{KB.clock:.2f}",
                     'Day': KB.day
                 })
 
+                #For tasks in visible columns
                 for col in KB.board_1.columns[::-1]:
                     for task in col.tasks:
                         Tasks.append({
@@ -167,6 +173,7 @@ def export_management():
                             'Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]': task.column_exit_time
                         })
 
+                #For columns
                 for col in KB.board_1.columns:
                     Columns.append({
                         'Column id': col.id,
@@ -177,9 +184,11 @@ def export_management():
                         'Tasks amount': len(col.tasks)
                     })
                 
+                #For config changes
                 for config in KB.board_1.configs:
                     config_changes.append(config)
-                    
+
+                #For tasks in invisible column (completed tasks)
                 for task in KB.board_1.completed_tasks:
                     Tasks_completed.append({
                         'Task id': task.id,
@@ -190,17 +199,17 @@ def export_management():
                         'Worker task': task.worker_task,
                         'Cycle time (Minutes)': task.cycle_time,
                         'Lead time (Minutes)': task.lead_time,
-                        #'Current column': task.current_column,
                         'Column Cycle Time (Minutes) [Backlog, Column 1, Column 2, Column 3, Column 4]': task.cycle_time_column,
                         'Column Entry Time [Backlog, Column 1, Column 2, Column 3, Column 4]': task.column_entry_time,
                         'Column Exit Time [Backlog, Column 1, Column 2, Column 3, Column 4]': task.column_exit_time
 
                         })
-                    
+                
+                #Combine completed tasks and current tasks for export
                 all_task = Tasks_completed + Tasks
 
+                #Export to JSON file
                 with open(export_path, 'w') as f:
-                    #json.dump({"tasks": Tasks}, f, indent=2)
                     json.dump({"Time Elapsed": Time_Elapsed,"config_changes": config_changes, "Columns": Columns, "Tasks" : all_task}, f, indent=2)
         
         while KB.paused_event.is_set():
