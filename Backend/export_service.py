@@ -34,7 +34,7 @@ BASE_COLUMNS = [
     "completed_task_count",
     "task_id",
     "task_name",
-    "task_state",
+    "task_processing_state",
     "worker_assigned",
     "remaining_processing_units",
     "created_day",
@@ -266,7 +266,7 @@ def build_task_rows(export_data):
             csv_column: _format_csv_cell(task.get(source_key))
             for csv_column, source_key in TASK_SOURCE_KEYS.items()
         })
-        row["task_state"] = _task_state(task)
+        row["task_processing_state"] = _task_state(task)
         row["worker_assigned"] = _worker_assigned(task.get("Worker task"))
         row["remaining_processing_units"] = _remaining_processing_units(task)
         row["created_day"] = created_day
