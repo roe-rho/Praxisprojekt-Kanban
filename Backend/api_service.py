@@ -37,15 +37,28 @@ def pause_simulation():
 
 def stop_simulation():
     """Reset the board"""
+    global simulation_thread
+
     KB.start_event.clear()
     KB.paused_event.clear()
+
+    if simulation_thread is not None and simulation_thread.is_alive():
+        simulation_thread.join(timeout=2)
 
     with KB.lock:
         if KB.board_1 is not None:
             for col in KB.board_1.columns:
                 col.tasks = []
+            KB.board_1.completed_tasks = []
+            KB.board_1.completed_tasks_count = 0
+            KB.board_1.average_cycle_time = 0
+            KB.board_1.average_lead_time = 0
+            KB.board_1.throughput = 0
+            KB.board_1.total_wip = 0
             KB.clock = 9.00
             KB.day = 1
+            KB.tick = 0
+            KB.id = 0
     
     return {"status": "Board reset"}
 
@@ -105,6 +118,10 @@ def get_metrics():
     with KB.lock:
         if KB.board_1 is None:
             return {"average_cycle_time": None, "average_lead_time": None, "completed_tasks_count": None, "total_wip": None, "throughput": None}
+
+        visible_task_count = sum(len(col.tasks) for col in KB.board_1.columns)
+        if visible_task_count == 0 and len(KB.board_1.completed_tasks) == 0:
+            return {"average_cycle_time": 0, "average_lead_time": 0, "completed_tasks_count": 0, "total_wip": 0, "throughput": 0}
     
         average_cycle_time = KB.board_1.average_cycle_time
         average_lead_time = KB.board_1.average_lead_time

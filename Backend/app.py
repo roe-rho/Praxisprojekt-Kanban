@@ -13,6 +13,13 @@ app = Flask(__name__, static_folder=FRONTEND_PATH, static_url_path='')
 # NEW: Enable CORS - allows localhost:8000 (Frontend) to communicate with localhost:5000 (Backend)
 CORS(app)  # Enable CORS for all routes
 
+@app.after_request
+def add_no_cache_headers(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 # NEW: Serve Frontend files (index.html, script.js, style.css) directly from Flask
 @app.route('/')
 def index():
