@@ -35,6 +35,7 @@ BASE_COLUMNS = [
     "task_id",
     "task_name",
     "task_processing_state",
+    "task_location", #added by ronan: this is to differentiate between visible and invisible tasks in the export file
     "worker_assigned",
     "remaining_processing_units",
     "created_day",
@@ -140,6 +141,14 @@ def _worker_assigned(value):
     return "Yes" if value else "No"
 
 
+def _task_location(task):
+    return task.get("Task location") or "Visible Board"
+
+
+def _is_archived_task(task):
+    return _task_location(task) == "Completed Archive"
+
+
 def _safe_list(value):
     if isinstance(value, list):
         return value
@@ -229,10 +238,19 @@ def _history_columns(export_data):
 
 
 def _current_column_for_task(task, export_data):
+    if _is_archived_task(task):
+        return ""
+
     current_column = task.get("Current column")
-    if current_column is None and task.get("Status") == "Completed":
+    if task.get("Status") == "Completed":
         return _last_column_id(export_data)
     return current_column
+
+
+def _current_column_name_for_task(task, current_column, column_names):
+    if _is_archived_task(task):
+        return "Completed Archive"
+    return column_names.get(current_column, "")
 
 
 def _history_values(task, history_count, export_data):
@@ -267,6 +285,7 @@ def build_task_rows(export_data):
             for csv_column, source_key in TASK_SOURCE_KEYS.items()
         })
         row["task_processing_state"] = _task_state(task)
+        row["task_location"] = _task_location(task)
         row["worker_assigned"] = _worker_assigned(task.get("Worker task"))
         row["remaining_processing_units"] = _remaining_processing_units(task)
         row["created_day"] = created_day
@@ -274,7 +293,7 @@ def build_task_rows(export_data):
         row["completed_day"] = completed_day
         row["completed_time"] = completed_time
         row["current_column_number"] = _format_csv_cell(current_column)
-        row["current_column_name"] = column_names.get(current_column, "")
+        row["current_column_name"] = _current_column_name_for_task(task, current_column, column_names)
         row.update(_history_values(task, history_count, export_data))
         rows.append(row)
 

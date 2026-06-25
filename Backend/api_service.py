@@ -164,6 +164,7 @@ def export_management():
                             'Created at': task.created_at,
                             'Done at': task.done_at,
                             'Status': task.status,
+                            'Task location': 'Visible Board', #added by ronan: this is to differentiate between visible and invisible tasks in the export file
                             'Worker task': task.worker_task,
                             'Cycle time (Minutes)': task.cycle_time,
                             'Lead time (Minutes)': task.lead_time,
@@ -196,6 +197,7 @@ def export_management():
                         'Created at': task.created_at,
                         'Done at': task.done_at,
                         'Status': task.status,
+                        'Task location': 'Completed Archive', #added by ronan: this is to differentiate between visible and invisible tasks in the export file
                         'Worker task': task.worker_task,
                         'Cycle time (Minutes)': task.cycle_time,
                         'Lead time (Minutes)': task.lead_time,

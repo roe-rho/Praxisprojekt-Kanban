@@ -57,7 +57,8 @@ def test_generate_tasks_csv_contains_readable_task_rows():
     assert rows[0]["completed_task_count"] == "1"
     assert rows[0]["task_id"] == "1"
     assert rows[0]["task_name"] == "Task 1"
-    assert rows[0]["task_state"] == "Completed"
+    assert rows[0]["task_processing_state"] == "Completed"
+    assert rows[0]["task_location"] == "Visible Board"
     assert rows[0]["worker_assigned"] == "No"
     assert rows[0]["remaining_processing_units"] == ""
     assert rows[0]["created_day"] == "1"
@@ -78,6 +79,75 @@ def test_generate_tasks_csv_returns_headers_when_no_tasks_exist():
     csv_text = export_service.generate_tasks_csv({"Tasks": []})
 
     assert csv_text.startswith("sep=;\r\nsimulation_day;simulation_clock_time")
+
+
+def test_completed_tasks_are_exported_as_done_even_with_stale_current_column():
+    export_data = {
+        "Columns": [
+            {"Column id": 0, "Column name": "Column 0", "Tasks amount": 0},
+            {"Column id": 1, "Column name": "Column 1", "Tasks amount": 0},
+            {"Column id": 2, "Column name": "Column 2", "Tasks amount": 0},
+            {"Column id": 3, "Column name": "Column 3", "Tasks amount": 0},
+            {"Column id": 4, "Column name": "Column 4", "Tasks amount": 0},
+            {"Column id": 5, "Column name": "Column 5", "Tasks amount": 1},
+        ],
+        "Tasks": [
+            {
+                "Task id": 9,
+                "Task name": "Task 9",
+                "Status": "Completed",
+                "Worker task": 0,
+                "Current column": 4,
+            }
+        ],
+    }
+
+    rows = _read_export_rows(export_service.generate_tasks_csv(export_data))
+
+    assert rows[0]["task_processing_state"] == "Completed"
+    assert rows[0]["task_location"] == "Visible Board"
+    assert rows[0]["current_column_number"] == "5"
+    assert rows[0]["current_column_name"] == "Done"
+
+
+def test_archived_completed_tasks_are_labeled_as_completed_archive():
+    export_data = {
+        "Columns": [
+            {"Column id": 0, "Column name": "Column 0", "Tasks amount": 0},
+            {"Column id": 1, "Column name": "Column 1", "Tasks amount": 0},
+            {"Column id": 2, "Column name": "Column 2", "Tasks amount": 0},
+            {"Column id": 3, "Column name": "Column 3", "Tasks amount": 0},
+            {"Column id": 4, "Column name": "Column 4", "Tasks amount": 0},
+            {"Column id": 5, "Column name": "Column 5", "Tasks amount": 5},
+        ],
+        "Tasks": [
+            {
+                "Task id": 1,
+                "Task name": "Task 1",
+                "Status": "Completed",
+                "Task location": "Completed Archive",
+                "Worker task": 0,
+                "Current column": 4,
+            },
+            {
+                "Task id": 2,
+                "Task name": "Task 2",
+                "Status": "Completed",
+                "Task location": "Visible Board",
+                "Worker task": 0,
+                "Current column": 4,
+            },
+        ],
+    }
+
+    rows = _read_export_rows(export_service.generate_tasks_csv(export_data))
+
+    assert rows[0]["task_location"] == "Completed Archive"
+    assert rows[0]["current_column_number"] == ""
+    assert rows[0]["current_column_name"] == "Completed Archive"
+    assert rows[1]["task_location"] == "Visible Board"
+    assert rows[1]["current_column_number"] == "5"
+    assert rows[1]["current_column_name"] == "Done"
 
 
 def test_export_csv_route_downloads_csv_file(tmp_path, monkeypatch):

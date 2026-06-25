@@ -226,6 +226,7 @@ def process_tasks(col):
             
 
 #Move tasks from done column to invisible column
+#ronan: this is basically an archive
 def done_tasks():
     with lock:
         if len(board_1.columns[num_columns - 1].tasks) >= board_1.columns[num_columns - 1].max_tasks + 1:
