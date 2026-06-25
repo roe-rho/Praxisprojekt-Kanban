@@ -1,6 +1,7 @@
 from flask import Flask, json, jsonify, request, send_from_directory
 from flask_cors import CORS # NEW: Added CORS support so Frontend can talk to Backend from different ports
 from api_service import get_board_data, get_metrics, start_simulation, pause_simulation, stop_simulation, get_clock_and_day, update_config
+from export_service import build_csv_response #ronan for adding the export fucntions
 import webbrowser # NEW: Import webbrowser to automatically open Frontend in browser
 import Kanban as KB
 import os
@@ -60,6 +61,10 @@ def metrics():
     #print(f"DEBUG: get_metrics function exists: {callable(get_metrics)}")
     #print(f"Metrics data: {metrics_data}")
     return jsonify(metrics_data)
+
+@app.route('/export/csv', methods=['GET']) #added api to export csv file
+def export_csv():
+    return build_csv_response()
 
 
 @app.route('/update-config', methods=['POST'])

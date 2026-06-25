@@ -1,12 +1,12 @@
 {
   "column_0": "5",
-  "column_1": "4",
+  "column_1": "5",
   "column_2": "5",
   "column_3": "5",
   "column_4": "5",
   "column_5": "5",
-  "tick_interval": "1.0",
-  "workers_1": "3",
+  "tick_interval": "2",
+  "workers_1": "2",
   "workers_2": "2",
   "workers_3": "2",
   "workers_4": "2"

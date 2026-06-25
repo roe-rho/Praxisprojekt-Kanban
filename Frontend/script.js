@@ -3,6 +3,7 @@ const startBtn = document.getElementById('start-btn');
 const pauseBtn = document.getElementById('pause-btn');
 const stopBtn = document.getElementById('stop-btn');
 const updateBtn = document.getElementById('update-btn');
+const exportCsvBtn = document.getElementById('export-csv-btn');
 
 // NEW: URL where Backend Flask server is running (must match app.run() host:port)
 const API_URL = 'http://localhost:5000';
@@ -214,6 +215,10 @@ updateBtn.addEventListener('click', async function() {
 
 
     //window.alert(`Update button clicked. New WIP limits: Backlog=${newconfig.column_0}, Doing=${newconfig.column_1}, Doing 2=${newconfig.column_2}, Done=${newconfig.column_3}, Workers 1=${newconfig.workers_1}, Workers 2=${newconfig.workers_2}`);
+});
+
+exportCsvBtn.addEventListener('click', function() {
+    window.location.href = `${API_URL}/export/csv`;
 });
 
 // NEW: Automatically fetch board state every 2 seconds to keep UI in sync with Backend

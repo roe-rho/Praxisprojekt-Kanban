@@ -89,7 +89,7 @@ def tick_manager():
 
     #Time and tick management
     tick = tick + 1 #Every tick interval, the tick count increases by 1
-    clock = clock + 0.10 #Every tick adds 10 minutes to the clock
+    clock = clock + 0.10 #Every tick adds 10 minutes to the clock #ronaz`n's comment 9.00 -> 9.10 -> 9.20 -> 9.30 -> 9.40 -> 9.50
 
     #If the minutes exceed 60, we add 40 minutes to the clock to move to the next hour
     if clock%1 >= 0.50:
