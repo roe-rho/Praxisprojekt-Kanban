@@ -41,6 +41,26 @@
       "Column name": "Column 5",
       "Initial WIP Limit": 5,
       "Initial Total Workers": 2
+    },
+    {
+      "[CONFIG]": "[UPDATED]",
+      "Update Time [Day, Time]": "Day: 3, Time: 16.10",
+      "Updated WIP Limits": {
+        "column_0": 5,
+        "column_1": 5,
+        "column_2": 5,
+        "column_3": 5,
+        "column_4": 5,
+        "column_5": 5
+      },
+      "Updated Total Workers": {
+        "column_0": 2,
+        "column_1": 2,
+        "column_2": 2,
+        "column_3": 2,
+        "column_4": 2,
+        "column_5": 2
+      }
     }
   ],
   "Columns": [
