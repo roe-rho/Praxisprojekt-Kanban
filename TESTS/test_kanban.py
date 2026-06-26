@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import Kanban as KB
 
 
@@ -54,31 +57,50 @@ def test_process_tasks_moves_task_from_backlog_to_processing_column():
     KB.generate_columns(3)
     KB.generate_task()
 
-    KB.process_tasks(1)
+    KB.process_tasks(0)
 
     assert KB.board_1.columns[0].tasks == []
     assert len(KB.board_1.columns[1].tasks) == 1
     task = KB.board_1.columns[1].tasks[0]
-    assert task.status == 10
-    assert task.worker_task == 1
-    assert KB.board_1.columns[1].workers == 1
+    assert task.current_column == 0
+    assert task.column_entry_time == ["9.00", "9.00"]
+    assert task.column_exit_time == ["9.00"]
+    assert task.cycle_time_column == [0]
 
 
 def test_process_tasks_moves_finished_task_to_done_column():
     KB.generate_columns(3)
     task = KB.Task(id=1, name="Task 1", created_at="Day: 1, Time: 9.0", worker_task=1, status=1)
+    task.created_tick = 0
+    task.column_entry_tick = [0, 0]
     KB.board_1.columns[1].tasks.append(task)
 
+    KB.process_tasks(1)
     KB.process_tasks(1)
 
     assert KB.board_1.columns[1].tasks == []
     assert KB.board_1.columns[2].tasks == [task]
-    assert task.status is None
+    assert task.status == "Completed"
     assert task.worker_task == 0
+    assert task.done_at == "Day: 1, Time: 9.0"
+    assert task.lead_time == 0
 
 
 def test_update_config_loads_wip_limits_and_worker_count():
     KB.generate_columns(3)
+    config_path = Path(KB.__file__).with_name("config.json")
+    config_path.write_text(
+        json.dumps(
+            {
+                "column_0": "9",
+                "column_1": "4",
+                "column_2": "5",
+                "workers_1": "2",
+                "tick_interval": "1",
+            }
+        ),
+        encoding="utf-8",
+    )
 
     KB.update_config()
 

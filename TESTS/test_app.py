@@ -16,12 +16,12 @@ def test_board_route_returns_current_board_state_as_json():
     }
 
 
-def test_reset_route_resets_board_state():
+def test_stop_route_resets_board_state():
     KB.generate_columns(3)
     KB.generate_task()
     client = flask_app.app.test_client()
 
-    response = client.post("/reset")
+    response = client.post("/stop")
 
     assert response.status_code == 200
     assert response.get_json() == {"status": "Board reset"}
