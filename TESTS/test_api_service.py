@@ -1,3 +1,5 @@
+import time
+
 import api_service
 import Kanban as KB
 
@@ -90,6 +92,27 @@ def test_stop_simulation_clears_visible_tasks_archive_and_metrics():
     assert KB.day == 1
     assert KB.tick == 0
     assert KB.id == 0
+
+
+def test_stop_simulation_stops_background_export_thread(monkeypatch):
+    KB.generate_columns(6)
+
+    def wait_until_stopped():
+        while KB.start_event.is_set():
+            time.sleep(0.01)
+
+    monkeypatch.setattr(KB, "main", wait_until_stopped)
+
+    assert api_service.start_simulation() == {"status": "Simulation started"}
+    started_export_thread = api_service.export_thread
+    assert started_export_thread is not None
+    assert started_export_thread.is_alive()
+
+    assert api_service.stop_simulation() == {"status": "Board reset"}
+    started_export_thread.join(timeout=1)
+
+    assert not started_export_thread.is_alive()
+    assert api_service.export_thread is None
 
 
 def test_get_metrics_returns_zero_values_after_board_is_cleared():

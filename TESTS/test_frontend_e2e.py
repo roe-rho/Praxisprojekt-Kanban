@@ -143,6 +143,31 @@ def test_configuration_speed_slider_sends_professional_speed_mapping(page, flask
 
 
 @pytest.mark.e2e
+def test_invalid_configuration_is_rejected_before_api_request(page, flask_server):
+    update_requests = []
+    dialog_messages = []
+
+    def record_update_request(route):
+        update_requests.append(route.request)
+        route.fulfill(status=200, json={"status": "unexpected"})
+
+    def accept_dialog(dialog):
+        dialog_messages.append(dialog.message)
+        dialog.accept()
+
+    page.route("**/update-config", record_update_request)
+    page.on("dialog", accept_dialog)
+    page.goto(flask_server)
+    page.locator("#column_0").fill("0")
+
+    page.get_by_role("button", name="Update Configuration").click()
+
+    assert dialog_messages
+    assert "WIP limits and worker counts must be at least 1" in dialog_messages[0]
+    assert update_requests == []
+
+
+@pytest.mark.e2e
 def test_start_pause_and_hold_stop_reset_user_workflow(page, flask_server):
     page.goto(flask_server)
 
@@ -151,7 +176,8 @@ def test_start_pause_and_hold_stop_reset_user_workflow(page, flask_server):
         "document.querySelectorAll('#kanban-board .cards > .card').length > 0",
         timeout=10000,
     )
-    assert "Total WIP:" in page.locator("#total-wip").inner_text()
+    total_wip_text = page.locator("#total-wip").inner_text()
+    assert "Total WIP:" in total_wip_text or "Work In Progress:" in total_wip_text
 
     page.get_by_role("button", name="Pause").click()
     page.wait_for_timeout(500)

@@ -1,6 +1,5 @@
 # Backend/api_service.py to simplify connection between frontend and backend
 import os
-import os
 import threading
 import time
 import Kanban as KB
@@ -12,6 +11,7 @@ export_thread = None
 
 def start_simulation():
     global simulation_thread
+    global export_thread
     
     if not KB.start_event.is_set():
         KB.start_event.set()
@@ -19,8 +19,9 @@ def start_simulation():
         simulation_thread = threading.Thread(target=KB.main, daemon=True)
         simulation_thread.start()
         # Launch export_management() in background thread so it doesn't block Flask
-        export_thread = threading.Thread(target=export_management, daemon=True)
-        export_thread.start()
+        if export_thread is None or not export_thread.is_alive():
+            export_thread = threading.Thread(target=export_management, daemon=True)
+            export_thread.start()
         return {"status": "Simulation started"}
     
     if KB.paused_event.is_set() and simulation_thread is not None and simulation_thread.is_alive():
@@ -38,12 +39,16 @@ def pause_simulation():
 def stop_simulation():
     """Reset the board"""
     global simulation_thread
+    global export_thread
 
     KB.start_event.clear()
     KB.paused_event.clear()
 
     if simulation_thread is not None and simulation_thread.is_alive():
         simulation_thread.join(timeout=2)
+
+    if export_thread is not None and export_thread.is_alive():
+        export_thread.join(timeout=2)
 
     with KB.lock:
         if KB.board_1 is not None:
@@ -59,6 +64,9 @@ def stop_simulation():
             KB.day = 1
             KB.tick = 0
             KB.id = 0
+
+    simulation_thread = None
+    export_thread = None
     
     return {"status": "Board reset"}
 
@@ -157,7 +165,7 @@ def export_management():
     backend_dir = os.path.dirname(os.path.abspath(__file__))
     # Define the export file path
     export_path = os.path.join(backend_dir, 'export.json')
-    while True:
+    while KB.start_event.is_set():
         if KB.board_1 is not None:
             with KB.lock:
                 Tasks =[]
@@ -231,6 +239,6 @@ def export_management():
                 with open(export_path, 'w') as f:
                     json.dump({"Time Elapsed": Time_Elapsed,"config_changes": config_changes, "Columns": Columns, "Tasks" : all_task}, f, indent=2)
         
-        while KB.paused_event.is_set():
+        while KB.paused_event.is_set() and KB.start_event.is_set():
             time.sleep(0.1)  # Sleep while paused or not started to avoid busy waiting
         time.sleep(0.5)  # Check for updates every second

@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
   schedule:
-    # GitHub Actions uses UTC. 07:00 UTC equals 08:00 CET (germantime)
+    # GitHub Actions uses UTC. 07:00 UTC equals 08:00 CET standard time.
     - cron: "0 7 * * *"
   workflow_dispatch:
 
@@ -21,6 +21,11 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Set up Node.js for frontend syntax checks
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 
@@ -30,5 +35,8 @@ jobs:
       - name: Check frontend JavaScript syntax
         run: node --check Frontend/script.js
 
-      - name: Run backend, export, regression, and frontend E2E tests
-        run: pytest TESTS -v
+      - name: Run backend, export, and regression tests
+        run: pytest TESTS -v -m "not e2e"
+
+      - name: Run frontend browser E2E tests
+        run: pytest TESTS/test_frontend_e2e.py -v

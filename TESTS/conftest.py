@@ -34,6 +34,7 @@ def reset_kanban_state():
     KB.num_columns = 3
     KB.board_1 = None
     api_service.simulation_thread = None
+    api_service.export_thread = None
 
     yield
 
@@ -41,6 +42,7 @@ def reset_kanban_state():
     KB.paused_event.clear()
     KB.running = False
     api_service.simulation_thread = None
+    api_service.export_thread = None
 
     if original_config is None:
         CONFIG_PATH.unlink(missing_ok=True)

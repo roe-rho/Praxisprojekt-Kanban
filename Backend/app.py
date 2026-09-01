@@ -78,7 +78,8 @@ def export_csv():
 def update_config():
     try:
         #print("\n\n===== FLASK UPDATE_CONFIG ENDPOINT CALLED =====\n\n")
-        new_config = request.get_json(silent=True) #I changed the JSON reader so that if no JSON is sent, the app politely returns a clear 400 error instead of crashing. via silent = true, it will return None instead of raising an error if the JSON is invalid or missing.
+        new_config = request.get_json(silent = True) #I changed the JSON reader so that if no JSON is sent, 
+        #the app returns a 400 error instead of crashing. via silent = true, it will return None instead of raising an error if the JSON is invalid or missing.
         if new_config is None:
             return jsonify({"error": "No JSON data provided"}), 400
         

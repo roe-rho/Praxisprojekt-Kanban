@@ -46,6 +46,19 @@ def test_update_config_route_rejects_missing_json_body():
     assert response.get_json() == {"error": "No JSON data provided"}
 
 
+def test_update_config_route_rejects_malformed_json_body():
+    client = flask_app.app.test_client()
+
+    response = client.post(
+        "/update-config",
+        data="{invalid json",
+        content_type="application/json",
+    )
+
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "No JSON data provided"}
+
+
 def test_update_config_route_writes_json_and_marks_config_updated():
     client = flask_app.app.test_client()
     new_config = {
