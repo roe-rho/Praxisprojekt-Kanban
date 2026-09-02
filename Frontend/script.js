@@ -12,6 +12,7 @@ const API_URL = window.location.origin;
 let isRunning = false;
 let holdTimer = null;
 let isExportingCsv = false;
+let displayVersion = 0;
 // NEW: Changed to 3 seconds for reset hold (user must hold button 3 seconds to reset)
 const HOLD_DURATION = 3000; // 3 seconds for reset hold
 
@@ -81,6 +82,10 @@ function resetLocalDisplay() {
     resetMetricsDisplay();
 }
 
+function invalidatePendingDisplayUpdates() {
+    displayVersion += 1;
+}
+
 async function fetchWithTimeout(url, options = {}, timeoutMs = 1500) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -97,6 +102,8 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 1500) {
 
 // NEW: Fetch the current board state from the Backend API
 async function fetchBoardState() {
+    const requestVersion = displayVersion;
+
     try {
         // NEW: Make GET request to /board endpoint
         const response = await fetchWithTimeout(`${API_URL}/board`);
@@ -105,9 +112,15 @@ async function fetchBoardState() {
         }
         // NEW: Convert response to JSON
         const data = await response.json();
+        if (requestVersion !== displayVersion) {
+            return;
+        }
         // NEW: Update the display with the fetched data
         updateBoardDisplay(data);
     } catch (error) {
+        if (requestVersion !== displayVersion) {
+            return;
+        }
         // NEW: Log any errors (e.g., if server is not running)
         console.error('Error fetching board:', error);
         resetLocalDisplay();
@@ -115,6 +128,8 @@ async function fetchBoardState() {
 }
 
 async function fetchClockAndDay() {
+    const requestVersion = displayVersion;
+
     try {
         // NEW: Make GET request to /clock-and-day endpoint to get clock and day
         const response = await fetchWithTimeout(`${API_URL}/clock-and-day`);
@@ -122,10 +137,16 @@ async function fetchClockAndDay() {
             throw new Error(`Clock request failed with status ${response.status}`);
         }
         const data2 = await response.json();
+        if (requestVersion !== displayVersion) {
+            return;
+        }
         // NEW: Update the display with the fetched clock and day (formatted to 2 decimal places)
         document.getElementById('clock').textContent = `Clock: ${parseFloat(data2.clock).toFixed(2)}`;
         document.getElementById('day').textContent = `Day: ${data2.day}`;
     } catch (error) {
+        if (requestVersion !== displayVersion) {
+            return;
+        }
         console.error('Error fetching clock and day:', error);
         resetClockAndDayDisplay();
     }
@@ -204,12 +225,17 @@ function updateBoardDisplay(data) {
 }
 
 async function fetchMetricsDisplay() {
+    const requestVersion = displayVersion;
+
     try {
         const response = await fetchWithTimeout(`${API_URL}/metrics`);
         if (!response.ok) {
             throw new Error(`Metrics request failed with status ${response.status}`);
         }
         const metrics_data = await response.json();
+        if (requestVersion !== displayVersion) {
+            return;
+        }
         console.log('Metrics data:', metrics_data);
         document.getElementById('average-cycle-time').textContent = `Average Cycle Time: ${metrics_data.average_cycle_time}`;
         document.getElementById('completed-tasks').textContent = `Completed Tasks: ${metrics_data.completed_tasks_count}`;
@@ -217,6 +243,9 @@ async function fetchMetricsDisplay() {
         document.getElementById('average-lead-time').textContent = `Average Lead Time: ${metrics_data.average_lead_time}`;
         document.getElementById('throughput').textContent = `Throughput: ${metrics_data.throughput} per day`;
     } catch (error) {
+        if (requestVersion !== displayVersion) {
+            return;
+        }
         console.error('Error fetching metrics:', error);
         resetMetricsDisplay();
     }
@@ -241,7 +270,9 @@ async function callAPI(endpoint) {
 }
 
 async function resetSimulation() {
+    invalidatePendingDisplayUpdates();
     await callAPI('/stop');
+    invalidatePendingDisplayUpdates();
     isRunning = false;
     startBtn.disabled = false;
     pauseBtn.disabled = true;
